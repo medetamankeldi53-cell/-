@@ -14,7 +14,7 @@ import { TrashScene } from "./Trash";
 import { Voiceover } from "./Voiceover";
 
 // «Уақыт» — ролик о пути: от первого фото до готовых работ.
-// 90 + 125 + 185 + 165 + 170 + 165 + 140 + 255 + 145 + 540 + 120 + 130 = 2230 кадров ≈ 74 с
+// 90 + 125 + 185 + 165 + 170 + 165 + 140 + 255 + 145 + 360 + 120 + 130 = 2050 кадров ≈ 68 с
 export const Journey: React.FC = () => {
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
@@ -46,7 +46,7 @@ export const Journey: React.FC = () => {
         <Series.Sequence name="9 Payoff" durationInFrames={145}>
           <PayoffScene />
         </Series.Sequence>
-        <Series.Sequence name="10 Latest works" durationInFrames={540}>
+        <Series.Sequence name="10 Latest works" durationInFrames={360}>
           <LatestScene />
         </Series.Sequence>
         <Series.Sequence name="11 Finale" durationInFrames={120}>

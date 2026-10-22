@@ -344,7 +344,7 @@ export const LatestScene: React.FC = () => {
   const frame = useCurrentFrame();
   return (
     <AbsoluteFill style={{ backgroundColor: "#000", fontFamily: "Montserrat" }}>
-      <Sequence name="Series title" durationInFrames={80}>
+      <Sequence name="Series title" durationInFrames={50}>
         <AbsoluteFill
           style={{
             justifyContent: "center",
@@ -359,8 +359,8 @@ export const LatestScene: React.FC = () => {
               letterSpacing: 22,
               color: GOLD,
               textAlign: "center",
-              opacity: interpolate(frame, [6, 26], [0, 1], clamp),
-              scale: String(interpolate(frame, [6, 80], [1.15, 1], clamp)),
+              opacity: interpolate(frame, [2, 14], [0, 1], clamp),
+              scale: String(interpolate(frame, [2, 50], [1.15, 1], clamp)),
               textShadow: `0 0 50px ${GOLD}66`,
             }}
           >
@@ -369,38 +369,38 @@ export const LatestScene: React.FC = () => {
             КУӘЛЕРІ
           </div>
         </AbsoluteFill>
-        <Narration text="Кішкене болса да — *жақсы* *меңгере* бастадым." />
+        <Narration text="*Жақсы* *меңгере* бастадым." />
       </Sequence>
-      <Sequence name="Poster — 1906" from={80} durationInFrames={65}>
+      <Sequence name="Poster — 1906" from={50} durationInFrames={40}>
         <PosterCard src="journey/poster-1906.jpg" />
         <FlashIn />
       </Sequence>
-      <Sequence name="Clip — 1906" from={145} durationInFrames={105}>
+      <Sequence name="Clip — 1906" from={90} durationInFrames={75}>
         <CinemaClip src="journey/ep1906.mp4" />
         <FlashIn length={6} />
       </Sequence>
-      <Sequence name="Poster — 1913" from={250} durationInFrames={65}>
+      <Sequence name="Poster — 1913" from={165} durationInFrames={40}>
         <PosterCard src="journey/poster-1913.jpg" />
         <FlashIn />
       </Sequence>
-      <Sequence name="Clip — car" from={315} durationInFrames={135}>
+      <Sequence name="Clip — car" from={205} durationInFrames={100}>
         <CinemaClip src="journey/car.mp4" />
         <FlashIn length={6} />
       </Sequence>
-      <Sequence name="Poster — ҚАЗІР" from={450} durationInFrames={90}>
+      <Sequence name="Poster — ҚАЗІР" from={305} durationInFrames={55}>
         <PosterCard src="journey/poster-kazir.jpg" />
         <FlashIn />
       </Sequence>
 
-      <Sequence name="SFX — title" from={6}>
+      <Sequence name="SFX — title" from={2}>
         <Audio src={staticFile("sfx/chime.wav")} volume={0.5} />
       </Sequence>
-      {[80, 250, 450].map((f) => (
+      {[50, 165, 305].map((f) => (
         <Sequence key={f} name="SFX — poster" from={f}>
           <Audio src={staticFile("sfx/boom.wav")} />
         </Sequence>
       ))}
-      {[143, 313].map((f) => (
+      {[88, 203].map((f) => (
         <Sequence key={f} name="SFX — clip" from={f}>
           <Audio src={staticFile("sfx/whoosh.wav")} volume={0.6} />
         </Sequence>
