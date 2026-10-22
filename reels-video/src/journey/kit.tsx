@@ -17,7 +17,9 @@ const clamp = {
   extrapolateRight: "clamp",
 } as const;
 
-// Дикторский текст: слова проявляются по одному, в конце строка гаснет
+// Дикторский текст: слова проявляются по одному, в конце строка гаснет.
+// Акценты в тексте: *слово* — золотом, ~слово~ — красным. Акцентное слово
+// крупнее, с подсветкой-маркером снизу и коротким «подпрыгиванием».
 export const Narration: React.FC<{
   text: string;
   bottom?: number;
@@ -38,24 +40,69 @@ export const Narration: React.FC<{
         justifyContent: "flex-end",
         alignItems: "center",
         paddingBottom: bottom,
-        paddingLeft: 90,
-        paddingRight: 90,
+        paddingLeft: 80,
+        paddingRight: 80,
         opacity: out,
       }}
     >
+      {/* Мягкое затемнение под субтитрами — читаемость на пёстром фоне */}
       <div
         style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          bottom: bottom - 160,
+          height: 520,
+          background:
+            "radial-gradient(ellipse 85% 55% at 50% 55%, rgba(0,0,0,0.8), rgba(0,0,0,0) 75%)",
+          opacity: interpolate(frame, [0, 8], [0, 1], clamp),
+        }}
+      />
+      <div
+        style={{
+          position: "relative",
           fontFamily: "Montserrat",
           fontSize: size,
           fontWeight: 800,
-          lineHeight: 1.2,
+          lineHeight: 1.3,
           textAlign: "center",
           color: gold ? GOLD : "#ffffff",
           textShadow: "0 4px 30px rgba(0,0,0,0.85), 0 0 4px rgba(0,0,0,0.6)",
         }}
       >
-        {text.split(" ").map((word, i) => {
-          const p = interpolate(frame, [i * 4, i * 4 + 10], [0, 1], {
+        {text.split(" ").map((raw, i) => {
+          const goldMark = /^\*(.+)\*$/.exec(raw);
+          const redMark = /^~(.+)~$/.exec(raw);
+          const word = goldMark?.[1] ?? redMark?.[1] ?? raw;
+          const accent = goldMark ? GOLD : redMark ? "#ff4d5e" : null;
+          const at = i * 4;
+          const p = interpolate(frame, [at, at + 10], [0, 1], {
+            ...clamp,
+            easing: Easing.out(Easing.cubic),
+          });
+          if (!accent) {
+            return (
+              <span
+                key={i}
+                style={{
+                  display: "inline-block",
+                  marginRight: "0.28em",
+                  opacity: p,
+                  translate: `0px ${(1 - p) * 30}px`,
+                  filter: `blur(${(1 - p) * 8}px)`,
+                }}
+              >
+                {word}
+              </span>
+            );
+          }
+          const bump = interpolate(
+            frame,
+            [at + 6, at + 11, at + 18],
+            [1, 1.22, 1],
+            clamp,
+          );
+          const marker = interpolate(frame, [at + 8, at + 18], [0, 100], {
             ...clamp,
             easing: Easing.out(Easing.cubic),
           });
@@ -65,9 +112,18 @@ export const Narration: React.FC<{
               style={{
                 display: "inline-block",
                 marginRight: "0.28em",
+                fontSize: "1.2em",
+                fontWeight: 900,
+                color: accent,
                 opacity: p,
                 translate: `0px ${(1 - p) * 30}px`,
                 filter: `blur(${(1 - p) * 8}px)`,
+                scale: String(bump),
+                textShadow: `0 0 28px ${accent}aa, 0 4px 24px rgba(0,0,0,0.9)`,
+                backgroundImage: `linear-gradient(${accent}55, ${accent}55)`,
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "0% 88%",
+                backgroundSize: `${marker}% 0.22em`,
               }}
             >
               {word}

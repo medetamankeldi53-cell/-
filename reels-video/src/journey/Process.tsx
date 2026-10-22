@@ -49,10 +49,10 @@ export const CharactersScene: React.FC = () => {
       </Sequence>
 
       <Sequence name="Narration 1" from={6} durationInFrames={104}>
-        <Narration text="Сосын кейіпкерлер пайда болды." />
+        <Narration text="Сосын *кейіпкерлер* пайда болды." />
       </Sequence>
       <Sequence name="Narration 2" from={112} durationInFrames={73}>
-        <Narration text="Әр образ — жаңа идея." />
+        <Narration text="Әр образ — *жаңа* *идея.*" />
       </Sequence>
 
       <Sequence name="SFX — char 1">
@@ -224,12 +224,12 @@ export const PromptsScene: React.FC = () => {
 
       <Sequence name="Narration 1" durationInFrames={104}>
         <Narration
-          text="Claude, Gemini, GPT — зерттеу басталды."
+          text="*Claude,* *Gemini,* *GPT* — зерттеу басталды."
           bottom={250}
         />
       </Sequence>
       <Sequence name="Narration 2" from={106} durationInFrames={59}>
-        <Narration text="Қаншама промпт жазылды…" bottom={250} />
+        <Narration text="*Қаншама* промпт жазылды…" bottom={250} />
       </Sequence>
 
       {AI_NAMES.map(([name, , at]) => (
@@ -352,10 +352,10 @@ export const FailsScene: React.FC = () => {
       </Sequence>
 
       <Sequence name="Narration 1" durationInFrames={110}>
-        <Narration text="Кейде бәрі қисық шықты…" />
+        <Narration text="Кейде бәрі ~қисық~ шықты…" />
       </Sequence>
       <Sequence name="Narration 2" from={112} durationInFrames={58}>
-        <Narration text="Қайта. Тағы қайта." gold />
+        <Narration text="*Қайта.* Тағы *қайта.*" />
       </Sequence>
 
       <Sequence name="SFX — glitch 1" from={18}>
@@ -413,10 +413,10 @@ export const NightsScene: React.FC = () => {
       </AbsoluteFill>
 
       <Sequence name="Narration 1" from={5} durationInFrames={68}>
-        <Narration text="Күн сайын — түнгі уақытымды арнадым." />
+        <Narration text="Күн сайын — *түнгі* *уақытымды* арнадым." />
       </Sequence>
       <Sequence name="Narration 2" from={78} durationInFrames={62}>
-        <Narration text="Жақсы меңгеру үшін." gold />
+        <Narration text="Жақсы *меңгеру* үшін." />
       </Sequence>
 
       <Audio

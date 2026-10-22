@@ -31,7 +31,7 @@ export const NightScene: React.FC = () => {
         <Clock minutes={2 * 60 + 47} size={220} />
       </div>
       <Sequence name="Narration" from={22} durationInFrames={65}>
-        <Narration text="Түн. Бәрі ұйқыда." />
+        <Narration text="*Түн.* Бәрі ұйқыда." />
       </Sequence>
       <Audio src={staticFile("sfx/tick.wav")} loop volume={0.7} />
     </AbsoluteFill>
@@ -58,7 +58,7 @@ export const FirstPhotoScene: React.FC = () => {
       />
       <AbsoluteFill style={{ backgroundColor: "#000", opacity: dark }} />
       <Sequence name="Narration" from={32} durationInFrames={90}>
-        <Narration text="Барлығы бір суреттен басталды." />
+        <Narration text="Барлығы *бір* *суреттен* басталды." />
       </Sequence>
       <Sequence name="SFX — light on" from={22}>
         <Audio src={staticFile("sfx/boom.wav")} />

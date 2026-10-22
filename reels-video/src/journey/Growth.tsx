@@ -256,16 +256,19 @@ export const ClaudeScene: React.FC = () => {
       </Sequence>
 
       <Sequence name="Narration 1" durationInFrames={72}>
-        <Narration text="Алғашында түсінісу қиын болды." bottom={200} />
+        <Narration text="Алғашында түсінісу ~қиын~ болды." bottom={200} />
       </Sequence>
       <Sequence name="Narration 2" from={74} durationInFrames={44}>
-        <Narration text="Қаншама идея айттым…" bottom={200} />
+        <Narration text="Қаншама *идея* айттым…" bottom={200} />
       </Sequence>
       <Sequence name="Narration 3" from={120} durationInFrames={70}>
-        <Narration text="Бірге — бір құрылым қалыптастырдық." bottom={200} />
+        <Narration
+          text="*Бірге* — бір *құрылым* қалыптастырдық."
+          bottom={200}
+        />
       </Sequence>
       <Sequence name="Narration 4" from={192} durationInFrames={63}>
-        <Narration text="Енді Claude-пен тіл табыстық." gold bottom={200} />
+        <Narration text="Енді Claude-пен *тіл* *табыстық.*" bottom={200} />
       </Sequence>
 
       {[8, 24].map((f) => (
@@ -366,7 +369,7 @@ export const LatestScene: React.FC = () => {
             КУӘЛЕРІ
           </div>
         </AbsoluteFill>
-        <Narration text="Кішкене болса да — жақсы меңгере бастадым." />
+        <Narration text="Кішкене болса да — *жақсы* *меңгере* бастадым." />
       </Sequence>
       <Sequence name="Poster — 1906" from={80} durationInFrames={65}>
         <PosterCard src="journey/poster-1906.jpg" />

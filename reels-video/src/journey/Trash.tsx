@@ -93,10 +93,10 @@ export const TrashScene: React.FC = () => {
       </AbsoluteFill>
 
       <Sequence name="Narration 1" durationInFrames={102}>
-        <Narration text="1247 сурет — себетте." gold />
+        <Narration text="*1247* сурет — себетте." />
       </Sequence>
       <Sequence name="Narration 2" from={100} durationInFrames={65}>
-        <Narration text="Әрқайсысы — бір әрекет." />
+        <Narration text="Әрқайсысы — *бір* *әрекет.*" />
       </Sequence>
 
       <Sequence name="SFX — counter" from={4} durationInFrames={34}>

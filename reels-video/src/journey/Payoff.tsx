@@ -19,7 +19,7 @@ export const PayoffScene: React.FC = () => {
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
       <Sequence name="Title" durationInFrames={55}>
-        <Narration text="Ең бастысы — уақыт." gold size={96} bottom={880} />
+        <Narration text="Ең бастысы — *уақыт.*" size={92} bottom={880} />
       </Sequence>
 
       <Sequence name="Poster — той" from={55} durationInFrames={45}>
