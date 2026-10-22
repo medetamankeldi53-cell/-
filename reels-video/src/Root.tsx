@@ -1,4 +1,5 @@
 import { Composition, Folder } from "remotion";
+import { Montage } from "./montage/Montage";
 import { ReelsVideo } from "./ReelsVideo";
 import { CtaScene } from "./scenes/CtaScene";
 import { HookScene } from "./scenes/HookScene";
@@ -48,6 +49,15 @@ export const RemotionRoot: React.FC = () => {
         height={1920}
         fps={30}
         durationInFrames={387}
+      />
+      {/* Монтаж из двух клипов: 60 + (68+75+48) + (52+60+75) − 6 − 8 = 424 кадра ≈ 14.1 с */}
+      <Composition
+        id="Montage"
+        component={Montage}
+        width={1080}
+        height={1920}
+        fps={30}
+        durationInFrames={424}
       />
     </>
   );
