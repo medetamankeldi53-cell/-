@@ -23,6 +23,16 @@
 npx remotion render Montage out/montage.mp4
 ```
 
+## Трейлер «Монтаж с Claude» (`Story`)
+
+`src/story/` — киношный трейлер ~29 с о том, как монтировался ролик: пролог «В мире, где…»,
+эпизоды «Техзадание», «Гит наносит ответный удар», «Монтаж» и финальные титры.
+Зерно, виньетка и кинополосы — `CinemaLook` в `src/story/ui.tsx`; звуки — `public/sfx/` (сгенерированы ffmpeg).
+
+```bash
+npx remotion render Story out/story.mp4
+```
+
 ## Запуск
 
 ```bash
