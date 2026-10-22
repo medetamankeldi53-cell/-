@@ -1,6 +1,7 @@
 import { Audio, Video } from "@remotion/media";
 import { linearTiming, TransitionSeries } from "@remotion/transitions";
 import { fade } from "@remotion/transitions/fade";
+import { zoomThrough } from "./zoomThrough";
 import {
   AbsoluteFill,
   Easing,
@@ -15,9 +16,9 @@ import {
 // 30 fps. Таймлайн (абсолютные кадры):
 //   0–60     хук 2 с: момент подмены из клипа 2, подмена на кадре 38
 //   54–245   клип 1: ускорение → slow-mo на подмене (кадр ~155) → реальная скорость
-//   245–432  клип 2 встык, без перехода: ускорение → slow-mo на подмене (кадр ~332) → реальная скорость
-// Клипы 1 и 2 склеены прямой склейкой, чтобы смотрелись как одно видео.
-// Переход только один: вспышка 6 кадров (хук → клип 1).
+//   231–418  клип 2: ускорение → slow-mo на подмене (кадр ~318) → реальная скорость
+// Переходы: вспышка 6 кадров (хук → клип 1); бесшовный наезд 14 кадров
+// (клип 1 → клип 2), чтобы оба клипа смотрелись как одно видео.
 
 // Вспышка белым — на подменах и склейках
 const Flash: React.FC = () => {
@@ -162,6 +163,10 @@ export const Montage: React.FC = () => {
             }}
           />
         </TransitionSeries.Sequence>
+        <TransitionSeries.Transition
+          presentation={zoomThrough()}
+          timing={linearTiming({ durationInFrames: 14 })}
+        />
         <TransitionSeries.Sequence name="Clip 2 — fast" durationInFrames={52}>
           <Video
             src={staticFile("clips/swap-2.mp4")}
@@ -202,7 +207,7 @@ export const Montage: React.FC = () => {
       <Sequence name="Flash — clip 1 swap" from={154} durationInFrames={12}>
         <Flash />
       </Sequence>
-      <Sequence name="Flash — clip 2 swap" from={331} durationInFrames={12}>
+      <Sequence name="Flash — clip 2 swap" from={317} durationInFrames={12}>
         <Flash />
       </Sequence>
 
@@ -216,7 +221,10 @@ export const Montage: React.FC = () => {
       <Sequence name="SFX — boom clip 1" from={154}>
         <Audio src={staticFile("sfx/boom.wav")} volume={0.9} />
       </Sequence>
-      <Sequence name="SFX — boom clip 2" from={331}>
+      <Sequence name="SFX — whoosh zoom" from={231}>
+        <Audio src={staticFile("sfx/whoosh.wav")} volume={0.5} />
+      </Sequence>
+      <Sequence name="SFX — boom clip 2" from={317}>
         <Audio src={staticFile("sfx/boom.wav")} volume={0.9} />
       </Sequence>
     </AbsoluteFill>

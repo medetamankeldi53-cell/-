@@ -50,14 +50,14 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         durationInFrames={387}
       />
-      {/* Монтаж из двух клипов: 60 + (68+75+48) + (52+60+75) − 6 = 432 кадра ≈ 14.4 с */}
+      {/* Монтаж из двух клипов: 60 + (68+75+48) + (52+60+75) − 6 − 14 = 418 кадров ≈ 13.9 с */}
       <Composition
         id="Montage"
         component={Montage}
         width={1080}
         height={1920}
         fps={30}
-        durationInFrames={432}
+        durationInFrames={418}
       />
     </>
   );
