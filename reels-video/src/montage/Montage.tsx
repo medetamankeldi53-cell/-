@@ -1,7 +1,6 @@
 import { Audio, Video } from "@remotion/media";
 import { linearTiming, TransitionSeries } from "@remotion/transitions";
 import { fade } from "@remotion/transitions/fade";
-import { slide } from "@remotion/transitions/slide";
 import {
   AbsoluteFill,
   Easing,
@@ -11,14 +10,14 @@ import {
   staticFile,
   useCurrentFrame,
 } from "remotion";
-import "../fonts";
 
 // Монтаж из двух клипов «прошли мимо — поменялись одеждой».
 // 30 fps. Таймлайн (абсолютные кадры):
 //   0–60     хук 2 с: момент подмены из клипа 2, подмена на кадре 38
 //   54–245   клип 1: ускорение → slow-mo на подмене (кадр ~155) → реальная скорость
-//   237–424  клип 2: ускорение → slow-mo на подмене (кадр ~324) → CTA
-// Переходы: вспышка 6 кадров (хук → клип 1), слайд 8 кадров (клип 1 → клип 2).
+//   245–432  клип 2 встык, без перехода: ускорение → slow-mo на подмене (кадр ~332) → реальная скорость
+// Клипы 1 и 2 склеены прямой склейкой, чтобы смотрелись как одно видео.
+// Переход только один: вспышка 6 кадров (хук → клип 1).
 
 // Вспышка белым — на подменах и склейках
 const Flash: React.FC = () => {
@@ -121,94 +120,6 @@ const SlowMoClip: React.FC<{ src: string; trimBefore: number }> = ({
   );
 };
 
-// Подпись вверху кадра
-const Caption: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const frame = useCurrentFrame();
-
-  return (
-    <AbsoluteFill style={{ alignItems: "center", paddingTop: 260 }}>
-      <Interactive.Div
-        name="Caption"
-        style={{
-          fontFamily: "Montserrat",
-          fontSize: 92,
-          fontWeight: 900,
-          lineHeight: 1.05,
-          color: "#ffffff",
-          textAlign: "center",
-          textTransform: "uppercase",
-          textShadow: "0 6px 28px rgba(0, 0, 0, 0.6)",
-          padding: "0 90px",
-          scale: interpolate(frame, [0, 8], [0.7, 1], {
-            easing: Easing.spring({ damping: 11 }),
-            output: "perceptual-scale",
-            extrapolateLeft: "clamp",
-            extrapolateRight: "clamp",
-          }),
-          opacity: interpolate(frame, [0, 4], [0, 1], {
-            extrapolateLeft: "clamp",
-            extrapolateRight: "clamp",
-          }),
-        }}
-      >
-        {children}
-      </Interactive.Div>
-    </AbsoluteFill>
-  );
-};
-
-// Призыв к действию в конце
-const Cta: React.FC = () => {
-  const frame = useCurrentFrame();
-
-  return (
-    <AbsoluteFill
-      style={{
-        justifyContent: "flex-end",
-        alignItems: "center",
-        paddingBottom: 300,
-      }}
-    >
-      <Interactive.Div
-        name="CTA shade"
-        style={{
-          position: "absolute",
-          inset: 0,
-          background:
-            "linear-gradient(180deg, rgba(0,0,0,0) 45%, rgba(0,0,0,0.65) 100%)",
-          opacity: interpolate(frame, [0, 10], [0, 1], {
-            extrapolateLeft: "clamp",
-            extrapolateRight: "clamp",
-          }),
-        }}
-      />
-      <Interactive.Div
-        name="CTA"
-        style={{
-          fontFamily: "Montserrat",
-          fontSize: 76,
-          fontWeight: 900,
-          lineHeight: 1.1,
-          color: "#ffffff",
-          textAlign: "center",
-          padding: "0 90px",
-          opacity: interpolate(frame, [0, 6], [0, 1], {
-            extrapolateLeft: "clamp",
-            extrapolateRight: "clamp",
-          }),
-          translate: interpolate(frame, [0, 12], ["0px 80px", "0px 0px"], {
-            easing: Easing.spring({ damping: 200 }),
-            extrapolateLeft: "clamp",
-            extrapolateRight: "clamp",
-          }),
-        }}
-      >
-        Какой образ твой — 1 или 2? 👇
-      </Interactive.Div>
-    </AbsoluteFill>
-  );
-};
-
 export const Montage: React.FC = () => {
   return (
     <AbsoluteFill style={{ backgroundColor: "#000000" }}>
@@ -251,10 +162,6 @@ export const Montage: React.FC = () => {
             }}
           />
         </TransitionSeries.Sequence>
-        <TransitionSeries.Transition
-          presentation={slide({ direction: "from-right" })}
-          timing={linearTiming({ durationInFrames: 8 })}
-        />
         <TransitionSeries.Sequence name="Clip 2 — fast" durationInFrames={52}>
           <Video
             src={staticFile("clips/swap-2.mp4")}
@@ -288,23 +195,6 @@ export const Montage: React.FC = () => {
         </TransitionSeries.Sequence>
       </TransitionSeries>
 
-      {/* Подписи */}
-      <Sequence name="Caption — hook"  durationInFrames={37}>
-        <Caption>Смотри на пиджак 👀</Caption>
-      </Sequence>
-      <Sequence name="Caption — what" from={37} durationInFrames={23}>
-        <Caption>Что?! 🤯</Caption>
-      </Sequence>
-      <Sequence name="Caption — again" from={60} durationInFrames={62}>
-        <Caption>Ещё раз. Медленно</Caption>
-      </Sequence>
-      <Sequence name="Caption — look 2" from={245} durationInFrames={44}>
-        <Caption>А теперь так</Caption>
-      </Sequence>
-      <Sequence name="CTA" from={364} durationInFrames={60}>
-        <Cta />
-      </Sequence>
-
       {/* Вспышки на подменах */}
       <Sequence name="Flash — hook swap" from={37} durationInFrames={12}>
         <Flash />
@@ -312,7 +202,7 @@ export const Montage: React.FC = () => {
       <Sequence name="Flash — clip 1 swap" from={154} durationInFrames={12}>
         <Flash />
       </Sequence>
-      <Sequence name="Flash — clip 2 swap" from={323} durationInFrames={12}>
+      <Sequence name="Flash — clip 2 swap" from={331} durationInFrames={12}>
         <Flash />
       </Sequence>
 
@@ -326,10 +216,7 @@ export const Montage: React.FC = () => {
       <Sequence name="SFX — boom clip 1" from={154}>
         <Audio src={staticFile("sfx/boom.wav")} volume={0.9} />
       </Sequence>
-      <Sequence name="SFX — whoosh to clip 2" from={228}>
-        <Audio src={staticFile("sfx/whoosh.wav")} volume={0.7} />
-      </Sequence>
-      <Sequence name="SFX — boom clip 2" from={323}>
+      <Sequence name="SFX — boom clip 2" from={331}>
         <Audio src={staticFile("sfx/boom.wav")} volume={0.9} />
       </Sequence>
     </AbsoluteFill>
