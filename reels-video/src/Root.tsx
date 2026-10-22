@@ -1,5 +1,6 @@
 import { Composition, Folder } from "remotion";
 import { Montage } from "./montage/Montage";
+import { Journey } from "./journey/Journey";
 import { ReelsVideo } from "./ReelsVideo";
 import { CtaScene } from "./scenes/CtaScene";
 import { HookScene } from "./scenes/HookScene";
@@ -126,6 +127,15 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         durationInFrames={870}
         defaultProps={{ lang: "kk" }}
+      />
+      {/* «Уақыт» — путь от первого фото до готовых работ: 1920 кадров = 64 с */}
+      <Composition
+        id="Journey"
+        component={Journey}
+        width={1080}
+        height={1920}
+        fps={30}
+        durationInFrames={1920}
       />
     </>
   );

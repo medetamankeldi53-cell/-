@@ -35,6 +35,16 @@ npx remotion render Story out/story.mp4      # орысша
 npx remotion render StoryKZ out/story-kz.mp4 # қазақша
 ```
 
+## «Уақыт» — путь автора (`Journey`)
+
+`src/journey/` — ролик 64 с на казахском: ночь → первое фото → персонажи → Claude/Gemini/GPT и промпты →
+брак и глитчи → корзина телефона (1247 фото) → ночные часы → итоговый монтаж работ → «Уақыт кетті. Бірақ бекер емес.»
+Материалы — `public/journey/`. Текст диктора с таймингом — `DIKTOR_KZ.md`.
+
+```bash
+npx remotion render Journey out/journey.mp4
+```
+
 ## Запуск
 
 ```bash
