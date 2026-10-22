@@ -239,7 +239,7 @@ export const PromptsScene: React.FC = () => {
         </Sequence>
       ))}
       <Sequence name="SFX — typing" from={50} durationInFrames={136}>
-        <Audio src={staticFile("sfx/type.wav")} loop volume={0.45} />
+        <Audio src={staticFile("sfx/type.wav")} loop volume={0.25} />
       </Sequence>
       <Sequence name="SFX — infinity" from={186}>
         <Audio src={staticFile("sfx/chime.wav")} volume={0.7} />

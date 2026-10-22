@@ -11,6 +11,7 @@ import {
 } from "./Process";
 import { ClaudeScene, LatestScene } from "./Growth";
 import { TrashScene } from "./Trash";
+import { Voiceover } from "./Voiceover";
 
 // «Уақыт» — ролик о пути: от первого фото до готовых работ.
 // 120 + 180 + 240 + 210 + 210 + 210 + 180 + 360 + 360 + 540 + 150 = 2760 кадров = 92 с
@@ -55,7 +56,8 @@ export const Journey: React.FC = () => {
 
       <CinemaLook />
 
-      <Audio src={staticFile("sfx/drone.wav")} volume={0.55} loop />
+      <Audio src={staticFile("sfx/drone.wav")} volume={0.35} loop />
+      <Voiceover />
       <Sequence name="SFX — riser to payoff" from={1665}>
         <Audio src={staticFile("sfx/riser.wav")} volume={0.6} />
       </Sequence>

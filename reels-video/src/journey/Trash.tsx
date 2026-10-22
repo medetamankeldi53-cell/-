@@ -100,10 +100,10 @@ export const TrashScene: React.FC = () => {
       </Sequence>
 
       <Sequence name="SFX — counter" from={4} durationInFrames={34}>
-        <Audio src={staticFile("sfx/type.wav")} loop volume={0.5} />
+        <Audio src={staticFile("sfx/type.wav")} loop volume={0.3} />
       </Sequence>
       <Sequence name="SFX — 1247" from={38}>
-        <Audio src={staticFile("sfx/boom.wav")} />
+        <Audio src={staticFile("sfx/boom.wav")} volume={0.6} />
       </Sequence>
       <Sequence name="SFX — scroll" from={60}>
         <Audio src={staticFile("sfx/riser.wav")} volume={0.5} />
