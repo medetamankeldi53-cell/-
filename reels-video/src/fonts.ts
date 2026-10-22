@@ -22,3 +22,24 @@ for (const subset of ["cyrillic-ext", "cyrillic", "latin"] as const) {
     });
   }
 }
+
+// Cormorant Garamond (OFL) — серифный шрифт для постеров, с казахскими буквами
+for (const subset of ["cyrillic-ext", "cyrillic", "latin"] as const) {
+  for (const weight of ["500", "700"]) {
+    loadFont({
+      family: "Cormorant Garamond",
+      url: staticFile(
+        `fonts/cormorant-garamond-${subset}-${weight}-normal.woff2`,
+      ),
+      weight,
+      unicodeRange: ranges[subset],
+    });
+  }
+  loadFont({
+    family: "Cormorant Garamond",
+    url: staticFile(`fonts/cormorant-garamond-${subset}-500-italic.woff2`),
+    weight: "500",
+    style: "italic",
+    unicodeRange: ranges[subset],
+  });
+}

@@ -1,5 +1,6 @@
-import { Composition, Folder } from "remotion";
+import { Composition, Folder, Still } from "remotion";
 import { Montage } from "./montage/Montage";
+import { JourneyCover } from "./journey/Cover";
 import { Journey } from "./journey/Journey";
 import { ReelsVideo } from "./ReelsVideo";
 import { CtaScene } from "./scenes/CtaScene";
@@ -136,6 +137,13 @@ export const RemotionRoot: React.FC = () => {
         height={1920}
         fps={30}
         durationInFrames={2050}
+      />
+      {/* Обложка Reels «Уақыт» */}
+      <Still
+        id="JourneyCover"
+        component={JourneyCover}
+        width={1080}
+        height={1920}
       />
     </>
   );
