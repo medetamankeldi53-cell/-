@@ -192,3 +192,46 @@ export const Clock: React.FC<{
     </div>
   );
 };
+
+// Постер целиком между кинополос: размытый фон + сам постер по центру
+export const PosterCard: React.FC<{ src: string }> = ({ src }) => {
+  const frame = useCurrentFrame();
+  return (
+    <AbsoluteFill style={{ backgroundColor: "#000", overflow: "hidden" }}>
+      <Img
+        src={staticFile(src)}
+        style={{
+          position: "absolute",
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          filter: "blur(40px) brightness(0.5)",
+          scale: "1.2",
+        }}
+      />
+      <AbsoluteFill
+        style={{
+          justifyContent: "center",
+          alignItems: "center",
+          scale: String(
+            interpolate(frame, [0, 12], [1.25, 1], {
+              ...clamp,
+              easing: Easing.out(Easing.cubic),
+            }) * interpolate(frame, [12, 90], [1, 1.04], clamp),
+          ),
+        }}
+      >
+        <Img
+          src={staticFile(src)}
+          style={{
+            height: 1640,
+            width: "auto",
+            maxWidth: 1000,
+            objectFit: "contain",
+            boxShadow: "0 30px 90px rgba(0,0,0,0.8)",
+          }}
+        />
+      </AbsoluteFill>
+    </AbsoluteFill>
+  );
+};

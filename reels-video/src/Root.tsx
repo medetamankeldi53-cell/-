@@ -128,14 +128,14 @@ export const RemotionRoot: React.FC = () => {
         durationInFrames={870}
         defaultProps={{ lang: "kk" }}
       />
-      {/* «Уақыт» — путь от первого фото до готовых работ: 1920 кадров = 64 с */}
+      {/* «Уақыт» — путь от первого фото до готовых работ: 2640 кадров = 88 с */}
       <Composition
         id="Journey"
         component={Journey}
         width={1080}
         height={1920}
         fps={30}
-        durationInFrames={1920}
+        durationInFrames={2640}
       />
     </>
   );

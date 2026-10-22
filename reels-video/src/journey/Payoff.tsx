@@ -7,7 +7,7 @@ import {
   useCurrentFrame,
 } from "remotion";
 import { shake } from "../story/ui";
-import { FlashIn, GOLD, Narration, Photo } from "./kit";
+import { FlashIn, GOLD, Narration, Photo, PosterCard } from "./kit";
 
 const clamp = {
   extrapolateLeft: "clamp",
@@ -41,7 +41,7 @@ const Clip: React.FC<{ src: string; trimBefore?: number; volume?: number }> = ({
   );
 };
 
-// 8. Итог: «Ең бастысы — уақыт» и быстрый монтаж результатов
+// 9. Итог: «Ең бастысы — уақыт» и быстрый монтаж результатов
 export const PayoffScene: React.FC = () => {
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
@@ -50,11 +50,11 @@ export const PayoffScene: React.FC = () => {
       </Sequence>
 
       <Sequence name="Poster — той" from={60} durationInFrames={45}>
-        <Photo src="journey/poster-toi.jpg" zoom={[1.2, 1]} />
+        <PosterCard src="journey/poster-toi.jpg" />
         <FlashIn />
       </Sequence>
       <Sequence name="Poster — киім" from={105} durationInFrames={45}>
-        <Photo src="journey/poster-kiim.jpg" zoom={[1.2, 1]} />
+        <PosterCard src="journey/poster-kiim.jpg" />
         <FlashIn />
       </Sequence>
       <Sequence name="Yurt — wide" from={150} durationInFrames={60}>
@@ -69,11 +69,7 @@ export const PayoffScene: React.FC = () => {
         <Clip src="journey/bench.mp4" volume={0.5} />
         <FlashIn length={6} />
       </Sequence>
-      <Sequence name="Awards" from={310} durationInFrames={40}>
-        <Clip src="journey/awards.mp4" volume={0.5} />
-        <FlashIn length={6} />
-      </Sequence>
-      <Sequence name="Character 3" from={350} durationInFrames={70}>
+      <Sequence name="Character 3" from={310} durationInFrames={50}>
         <Clip src="journey/talk3.mp4" volume={1} />
         <FlashIn length={6} />
       </Sequence>
@@ -87,7 +83,7 @@ export const PayoffScene: React.FC = () => {
       <Sequence name="SFX — poster 2" from={105}>
         <Audio src={staticFile("sfx/boom.wav")} />
       </Sequence>
-      {[148, 208, 268, 308, 348].map((f) => (
+      {[148, 208, 268, 308].map((f) => (
         <Sequence key={f} name="SFX — cut" from={f}>
           <Audio src={staticFile("sfx/whoosh.wav")} volume={0.6} />
         </Sequence>
@@ -96,7 +92,7 @@ export const PayoffScene: React.FC = () => {
   );
 };
 
-// 9. Финал: «Уақыт кетті. Бірақ бекер емес.»
+// 11. Финал: «Уақыт кетті. Бірақ бекер емес.»
 export const FinaleScene: React.FC = () => {
   const frame = useCurrentFrame();
   const slam = interpolate(frame, [50, 57], [0, 1], clamp);
