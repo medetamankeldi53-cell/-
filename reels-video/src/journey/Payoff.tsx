@@ -1,4 +1,4 @@
-import { Audio, Video } from "@remotion/media";
+import { Audio } from "@remotion/media";
 import {
   AbsoluteFill,
   interpolate,
@@ -14,80 +14,32 @@ const clamp = {
   extrapolateRight: "clamp",
 } as const;
 
-// Клип на весь кадр с лёгким отъездом камеры
-const Clip: React.FC<{ src: string; trimBefore?: number; volume?: number }> = ({
-  src,
-  trimBefore = 0,
-  volume = 0,
-}) => {
-  const frame = useCurrentFrame();
-  return (
-    <AbsoluteFill
-      style={{ scale: String(interpolate(frame, [0, 60], [1.12, 1], clamp)) }}
-    >
-      <Video
-        src={staticFile(src)}
-        trimBefore={trimBefore}
-        volume={volume}
-        muted={volume === 0}
-        objectFit="cover"
-        style={{
-          width: "100%",
-          height: "100%",
-          filter: "contrast(1.08) saturate(1.1)",
-        }}
-      />
-    </AbsoluteFill>
-  );
-};
-
-// 9. Итог: «Ең бастысы — уақыт» и быстрый монтаж результатов
+// 9. Итог: «Ең бастысы — уақыт» и постеры
 export const PayoffScene: React.FC = () => {
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
-      <Sequence name="Title" durationInFrames={60}>
+      <Sequence name="Title" durationInFrames={55}>
         <Narration text="Ең бастысы — уақыт." gold size={96} bottom={880} />
       </Sequence>
 
-      <Sequence name="Poster — той" from={60} durationInFrames={45}>
+      <Sequence name="Poster — той" from={55} durationInFrames={45}>
         <PosterCard src="journey/poster-toi.jpg" />
         <FlashIn />
       </Sequence>
-      <Sequence name="Poster — киім" from={105} durationInFrames={45}>
+      <Sequence name="Poster — киім" from={100} durationInFrames={45}>
         <PosterCard src="journey/poster-kiim.jpg" />
         <FlashIn />
-      </Sequence>
-      <Sequence name="Yurt — wide" from={150} durationInFrames={60}>
-        <Clip src="journey/yurt-wide.mp4" trimBefore={30} volume={0.4} />
-        <FlashIn length={6} />
-      </Sequence>
-      <Sequence name="Yurt — character 2" from={210} durationInFrames={60}>
-        <Clip src="journey/yurt-talk2.mp4" volume={1} />
-        <FlashIn length={6} />
-      </Sequence>
-      <Sequence name="Bench" from={270} durationInFrames={40}>
-        <Clip src="journey/bench.mp4" volume={0.5} />
-        <FlashIn length={6} />
-      </Sequence>
-      <Sequence name="Character 3" from={310} durationInFrames={50}>
-        <Clip src="journey/talk3.mp4" volume={1} />
-        <FlashIn length={6} />
       </Sequence>
 
       <Sequence name="SFX — title">
         <Audio src={staticFile("sfx/boom.wav")} />
       </Sequence>
-      <Sequence name="SFX — poster 1" from={60}>
+      <Sequence name="SFX — poster 1" from={55}>
         <Audio src={staticFile("sfx/boom.wav")} />
       </Sequence>
-      <Sequence name="SFX — poster 2" from={105}>
+      <Sequence name="SFX — poster 2" from={100}>
         <Audio src={staticFile("sfx/boom.wav")} />
       </Sequence>
-      {[148, 208, 268, 308].map((f) => (
-        <Sequence key={f} name="SFX — cut" from={f}>
-          <Audio src={staticFile("sfx/whoosh.wav")} volume={0.6} />
-        </Sequence>
-      ))}
     </AbsoluteFill>
   );
 };

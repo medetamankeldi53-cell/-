@@ -37,11 +37,11 @@ export const TrashScene: React.FC = () => {
   // Прокрутка галереи, разгоняется
   const scroll = interpolate(
     frame,
-    [56, 205],
+    [56, 160],
     [0, SHOT_H * SHOTS.length - 1920],
     { ...clamp, easing: Easing.in(Easing.quad) },
   );
-  const speed = interpolate(frame, [56, 205], [0, 14], clamp);
+  const speed = interpolate(frame, [56, 160], [0, 14], clamp);
 
   return (
     <AbsoluteFill style={{ backgroundColor: "#000", overflow: "hidden" }}>
@@ -95,7 +95,7 @@ export const TrashScene: React.FC = () => {
       <Sequence name="Narration 1" durationInFrames={102}>
         <Narration text="1247 сурет — себетте." gold />
       </Sequence>
-      <Sequence name="Narration 2" from={106} durationInFrames={104}>
+      <Sequence name="Narration 2" from={100} durationInFrames={65}>
         <Narration text="Әрқайсысы — бір әрекет." />
       </Sequence>
 

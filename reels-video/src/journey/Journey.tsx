@@ -14,36 +14,36 @@ import { TrashScene } from "./Trash";
 import { Voiceover } from "./Voiceover";
 
 // «Уақыт» — ролик о пути: от первого фото до готовых работ.
-// 120 + 180 + 240 + 210 + 210 + 210 + 180 + 360 + 360 + 540 + 150 = 2760 кадров = 92 с
+// 90 + 125 + 185 + 165 + 170 + 165 + 140 + 255 + 145 + 540 + 150 = 2130 кадров = 71 с
 export const Journey: React.FC = () => {
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
       <Series>
-        <Series.Sequence name="1 Night" durationInFrames={120}>
+        <Series.Sequence name="1 Night" durationInFrames={90}>
           <NightScene />
         </Series.Sequence>
-        <Series.Sequence name="2 First photo" durationInFrames={180}>
+        <Series.Sequence name="2 First photo" durationInFrames={125}>
           <FirstPhotoScene />
         </Series.Sequence>
-        <Series.Sequence name="3 Characters" durationInFrames={240}>
+        <Series.Sequence name="3 Characters" durationInFrames={185}>
           <CharactersScene />
         </Series.Sequence>
-        <Series.Sequence name="4 Prompts" durationInFrames={210}>
+        <Series.Sequence name="4 Prompts" durationInFrames={165}>
           <PromptsScene />
         </Series.Sequence>
-        <Series.Sequence name="5 Fails" durationInFrames={210}>
+        <Series.Sequence name="5 Fails" durationInFrames={170}>
           <FailsScene />
         </Series.Sequence>
-        <Series.Sequence name="6 Trash" durationInFrames={210}>
+        <Series.Sequence name="6 Trash" durationInFrames={165}>
           <TrashScene />
         </Series.Sequence>
-        <Series.Sequence name="7 Nights" durationInFrames={180}>
+        <Series.Sequence name="7 Nights" durationInFrames={140}>
           <NightsScene />
         </Series.Sequence>
-        <Series.Sequence name="8 Claude" durationInFrames={360}>
+        <Series.Sequence name="8 Claude" durationInFrames={255}>
           <ClaudeScene />
         </Series.Sequence>
-        <Series.Sequence name="9 Payoff" durationInFrames={360}>
+        <Series.Sequence name="9 Payoff" durationInFrames={145}>
           <PayoffScene />
         </Series.Sequence>
         <Series.Sequence name="10 Latest works" durationInFrames={540}>
@@ -58,8 +58,8 @@ export const Journey: React.FC = () => {
 
       <Audio src={staticFile("sfx/drone.wav")} volume={0.35} loop />
       <Voiceover />
-      <Sequence name="SFX — riser to payoff" from={1665}>
-        <Audio src={staticFile("sfx/riser.wav")} volume={0.6} />
+      <Sequence name="SFX — riser to payoff" from={1250}>
+        <Audio src={staticFile("sfx/riser.wav")} volume={0.35} />
       </Sequence>
     </AbsoluteFill>
   );

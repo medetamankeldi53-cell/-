@@ -19,15 +19,15 @@ const clamp = {
 export const CharactersScene: React.FC = () => {
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
-      <Sequence name="Character 1" durationInFrames={80}>
+      <Sequence name="Character 1" durationInFrames={60}>
         <Photo src="journey/char1.jpg" zoom={[1.08, 1]} />
         <FlashIn />
       </Sequence>
-      <Sequence name="Character 2" from={80} durationInFrames={80}>
+      <Sequence name="Character 2" from={60} durationInFrames={50}>
         <Photo src="journey/char2.jpg" zoom={[1.08, 1]} />
         <FlashIn />
       </Sequence>
-      <Sequence name="Look — green" from={160} durationInFrames={27}>
+      <Sequence name="Look — green" from={110} durationInFrames={25}>
         <Photo
           src="journey/char3.jpg"
           zoom={[1.15, 1.05]}
@@ -35,7 +35,7 @@ export const CharactersScene: React.FC = () => {
         />
         <FlashIn length={6} />
       </Sequence>
-      <Sequence name="Look — white" from={187} durationInFrames={26}>
+      <Sequence name="Look — white" from={135} durationInFrames={25}>
         <Photo
           src="journey/char2-white.jpg"
           zoom={[1.15, 1.05]}
@@ -43,31 +43,31 @@ export const CharactersScene: React.FC = () => {
         />
         <FlashIn length={6} />
       </Sequence>
-      <Sequence name="Look — coat" from={213} durationInFrames={27}>
+      <Sequence name="Look — coat" from={160} durationInFrames={25}>
         <Photo src="journey/char2-coat.jpg" zoom={[1.15, 1.05]} />
         <FlashIn length={6} />
       </Sequence>
 
-      <Sequence name="Narration 1" from={6} durationInFrames={150}>
+      <Sequence name="Narration 1" from={6} durationInFrames={104}>
         <Narration text="Сосын кейіпкерлер пайда болды." />
       </Sequence>
-      <Sequence name="Narration 2" from={162} durationInFrames={78}>
+      <Sequence name="Narration 2" from={112} durationInFrames={73}>
         <Narration text="Әр образ — жаңа идея." />
       </Sequence>
 
       <Sequence name="SFX — char 1">
         <Audio src={staticFile("sfx/boom.wav")} />
       </Sequence>
-      <Sequence name="SFX — char 2" from={80}>
+      <Sequence name="SFX — char 2" from={60}>
         <Audio src={staticFile("sfx/boom.wav")} />
       </Sequence>
-      <Sequence name="SFX — look 1" from={158}>
+      <Sequence name="SFX — look 1" from={108}>
         <Audio src={staticFile("sfx/whoosh.wav")} />
       </Sequence>
-      <Sequence name="SFX — look 2" from={185}>
+      <Sequence name="SFX — look 2" from={133}>
         <Audio src={staticFile("sfx/whoosh.wav")} />
       </Sequence>
-      <Sequence name="SFX — look 3" from={211}>
+      <Sequence name="SFX — look 3" from={158}>
         <Audio src={staticFile("sfx/whoosh.wav")} />
       </Sequence>
     </AbsoluteFill>
@@ -102,12 +102,11 @@ export const PromptsScene: React.FC = () => {
     ...clamp,
     easing: Easing.inOut(Easing.cubic),
   });
-  const shown = Math.max(0, Math.floor((frame - 50) / 11) + 1);
+  const shown = Math.max(0, Math.floor((frame - 50) / 8) + 1);
   const scroll =
-    Math.max(0, interpolate(frame, [50, 50 + 11 * 12], [0, 12], clamp) - 6) *
-    64;
+    Math.max(0, interpolate(frame, [50, 50 + 8 * 12], [0, 12], clamp) - 6) * 64;
   const count = Math.floor(
-    interpolate(frame, [60, 185], [1, 999], {
+    interpolate(frame, [60, 140], [1, 999], {
       ...clamp,
       easing: Easing.in(Easing.exp),
     }),
@@ -181,7 +180,7 @@ export const PromptsScene: React.FC = () => {
             const typed = Math.floor(
               interpolate(
                 frame,
-                [50 + i * 11, 58 + i * 11],
+                [50 + i * 8, 56 + i * 8],
                 [0, line.length],
                 clamp,
               ),
@@ -223,13 +222,13 @@ export const PromptsScene: React.FC = () => {
         {frame >= 186 ? "∞" : count}
       </div>
 
-      <Sequence name="Narration 1" durationInFrames={98}>
+      <Sequence name="Narration 1" durationInFrames={104}>
         <Narration
           text="Claude, Gemini, GPT — зерттеу басталды."
           bottom={250}
         />
       </Sequence>
-      <Sequence name="Narration 2" from={102} durationInFrames={108}>
+      <Sequence name="Narration 2" from={106} durationInFrames={59}>
         <Narration text="Қаншама промпт жазылды…" bottom={250} />
       </Sequence>
 
@@ -238,10 +237,10 @@ export const PromptsScene: React.FC = () => {
           <Audio src={staticFile("sfx/boom.wav")} volume={0.55} />
         </Sequence>
       ))}
-      <Sequence name="SFX — typing" from={50} durationInFrames={136}>
+      <Sequence name="SFX — typing" from={50} durationInFrames={92}>
         <Audio src={staticFile("sfx/type.wav")} loop volume={0.25} />
       </Sequence>
-      <Sequence name="SFX — infinity" from={186}>
+      <Sequence name="SFX — infinity" from={142}>
         <Audio src={staticFile("sfx/chime.wav")} volume={0.7} />
       </Sequence>
     </AbsoluteFill>
@@ -251,18 +250,16 @@ export const PromptsScene: React.FC = () => {
 // 5. Брак: глитчи, «ҚАТЕ», вечная перегенерация
 export const FailsScene: React.FC = () => {
   const frame = useCurrentFrame();
-  const progress = interpolate(frame, [142, 194], [0, 99], {
+  const progress = interpolate(frame, [112, 150], [0, 99], {
     ...clamp,
     easing: Easing.out(Easing.quad),
   });
-  const failed = frame >= 196;
+  const failed = frame >= 152;
 
   return (
     <AbsoluteFill style={{ backgroundColor: "#000", fontFamily: "Montserrat" }}>
-      <Sequence name="Fail — bench" durationInFrames={70}>
-        <Glitch
-          active={(f) => (f >= 18 && f < 28) || (f >= 44 && f < 52) || f >= 62}
-        >
+      <Sequence name="Fail — bench" durationInFrames={55}>
+        <Glitch active={(f) => (f >= 18 && f < 28) || f >= 44}>
           <Video
             src={staticFile("journey/bench.mp4")}
             muted
@@ -271,12 +268,12 @@ export const FailsScene: React.FC = () => {
           />
         </Glitch>
       </Sequence>
-      <Sequence name="Fail — warped" from={70} durationInFrames={72}>
-        <Glitch active={(f) => f < 10 || (f >= 40 && f < 54) || f >= 64}>
+      <Sequence name="Fail — warped" from={55} durationInFrames={55}>
+        <Glitch active={(f) => f < 10 || (f >= 30 && f < 40) || f >= 48}>
           <AbsoluteFill
             style={{
-              scale: `${interpolate(frame, [70, 140], [1.0, 1.7])} ${interpolate(frame, [70, 140], [1.0, 0.7])}`,
-              transform: `skewX(${interpolate(frame, [70, 140], [0, 14])}deg)`,
+              scale: `${interpolate(frame, [55, 110], [1.0, 1.7])} ${interpolate(frame, [55, 110], [1.0, 0.7])}`,
+              transform: `skewX(${interpolate(frame, [55, 110], [0, 14])}deg)`,
             }}
           >
             <Photo src="journey/char2-coat.jpg" zoom={[1, 1]} />
@@ -284,7 +281,7 @@ export const FailsScene: React.FC = () => {
         </Glitch>
       </Sequence>
 
-      <Sequence name="Regenerate" from={142}>
+      <Sequence name="Regenerate" from={110}>
         <AbsoluteFill
           style={{
             background:
@@ -343,21 +340,21 @@ export const FailsScene: React.FC = () => {
           </div>
         </AbsoluteFill>
       </Sequence>
-      <Sequence from={20} durationInFrames={50}>
+      <Sequence from={20} durationInFrames={35}>
         <Stamp at={0} color="#ff4d5e" rotate={-9} size={170}>
           ҚАТЕ
         </Stamp>
       </Sequence>
-      <Sequence from={96} durationInFrames={46}>
+      <Sequence from={75} durationInFrames={35}>
         <Stamp at={0} color="#ff4d5e" rotate={8} size={120}>
           Тағы қате
         </Stamp>
       </Sequence>
 
-      <Sequence name="Narration 1" durationInFrames={104}>
+      <Sequence name="Narration 1" durationInFrames={110}>
         <Narration text="Кейде бәрі қисық шықты…" />
       </Sequence>
-      <Sequence name="Narration 2" from={108} durationInFrames={102}>
+      <Sequence name="Narration 2" from={112} durationInFrames={58}>
         <Narration text="Қайта. Тағы қайта." gold />
       </Sequence>
 
@@ -367,17 +364,17 @@ export const FailsScene: React.FC = () => {
       <Sequence name="SFX — error 1" from={20}>
         <Audio src={staticFile("sfx/buzz.wav")} />
       </Sequence>
-      <Sequence name="SFX — glitch 2" from={70}>
+      <Sequence name="SFX — glitch 2" from={55}>
         <Audio src={staticFile("sfx/glitch.wav")} />
       </Sequence>
-      <Sequence name="SFX — error 2" from={96}>
+      <Sequence name="SFX — error 2" from={75}>
         <Audio src={staticFile("sfx/buzz.wav")} />
         <Audio src={staticFile("sfx/boom.wav")} volume={0.6} />
       </Sequence>
-      <Sequence name="SFX — glitch 3" from={134}>
+      <Sequence name="SFX — glitch 3" from={103}>
         <Audio src={staticFile("sfx/glitch.wav")} />
       </Sequence>
-      <Sequence name="SFX — fail at 99%" from={196}>
+      <Sequence name="SFX — fail at 99%" from={152}>
         <Audio src={staticFile("sfx/buzz.wav")} />
       </Sequence>
     </AbsoluteFill>
@@ -389,7 +386,7 @@ export const NightsScene: React.FC = () => {
   const frame = useCurrentFrame();
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
-      <Sequence name="Road" durationInFrames={95}>
+      <Sequence name="Road" durationInFrames={75}>
         <Photo
           src="journey/road.jpg"
           zoom={[1.05, 1.2]}
@@ -403,7 +400,7 @@ export const NightsScene: React.FC = () => {
           }}
         />
       </Sequence>
-      <Sequence name="Room" from={95}>
+      <Sequence name="Room" from={75}>
         <Photo
           src="journey/room.jpg"
           zoom={[1.05, 1.18]}
@@ -412,13 +409,13 @@ export const NightsScene: React.FC = () => {
         <FlashIn length={8} />
       </Sequence>
       <AbsoluteFill style={{ alignItems: "center", paddingTop: 230 }}>
-        <Clock minutes={23 * 60 + frame * 1.85} size={150} />
+        <Clock minutes={23 * 60 + frame * 2.4} size={150} />
       </AbsoluteFill>
 
-      <Sequence name="Narration 1" from={5} durationInFrames={88}>
+      <Sequence name="Narration 1" from={5} durationInFrames={68}>
         <Narration text="Күн сайын — түнгі уақытымды арнадым." />
       </Sequence>
-      <Sequence name="Narration 2" from={98} durationInFrames={82}>
+      <Sequence name="Narration 2" from={78} durationInFrames={62}>
         <Narration text="Жақсы меңгеру үшін." gold />
       </Sequence>
 
@@ -428,7 +425,7 @@ export const NightsScene: React.FC = () => {
         volume={0.7}
         playbackRate={2}
       />
-      <Sequence name="SFX — room" from={93}>
+      <Sequence name="SFX — room" from={73}>
         <Audio src={staticFile("sfx/whoosh.wav")} volume={0.6} />
       </Sequence>
     </AbsoluteFill>

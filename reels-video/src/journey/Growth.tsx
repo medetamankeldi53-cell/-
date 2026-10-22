@@ -85,7 +85,7 @@ const IdeaStorm: React.FC = () => {
   return (
     <AbsoluteFill>
       {IDEAS.map(([text, who], i) => {
-        const appear = 4 + i * 5;
+        const appear = 4 + i * 3;
         const p = interpolate(frame, [appear, appear + 10], [0, 1], {
           ...clamp,
           easing: Easing.out(Easing.back(1.6)),
@@ -95,7 +95,7 @@ const IdeaStorm: React.FC = () => {
         const y0 = 270 + i * 80;
         const drift = Math.sin((frame + i * 13) / 14) * 14;
         // Сборка в шаг воронки
-        const gather = interpolate(frame, [95 + i * 2, 125 + i * 2], [0, 1], {
+        const gather = interpolate(frame, [52 + i * 2, 80 + i * 2], [0, 1], {
           ...clamp,
           easing: Easing.inOut(Easing.cubic),
         });
@@ -134,7 +134,7 @@ const IdeaStorm: React.FC = () => {
 // Структура работы: шаги появляются, потом по очереди «загораются»
 const Pipeline: React.FC = () => {
   const frame = useCurrentFrame();
-  const line = interpolate(frame, [100, 150], [0, 1], clamp);
+  const line = interpolate(frame, [56, 96], [0, 1], clamp);
   return (
     <AbsoluteFill>
       <div
@@ -148,7 +148,7 @@ const Pipeline: React.FC = () => {
           fontWeight: 900,
           letterSpacing: 12,
           color: GOLD,
-          opacity: interpolate(frame, [100, 112], [0, 1], clamp),
+          opacity: interpolate(frame, [56, 68], [0, 1], clamp),
         }}
       >
         ЖҰМЫС ҚҰРЫЛЫМЫ
@@ -165,12 +165,12 @@ const Pipeline: React.FC = () => {
         }}
       />
       {STEPS.map((step, i) => {
-        const appear = 104 + i * 6;
+        const appear = 56 + i * 5;
         const p = interpolate(frame, [appear, appear + 10], [0, 1], {
           ...clamp,
           easing: Easing.out(Easing.back(1.4)),
         });
-        const lit = frame >= 186 + i * 7;
+        const lit = frame >= 112 + i * 6;
         return (
           <div
             key={step}
@@ -231,7 +231,7 @@ export const ClaudeScene: React.FC = () => {
         fontFamily: "Montserrat",
       }}
     >
-      <Sequence name="Before" durationInFrames={84}>
+      <Sequence name="Before" durationInFrames={70}>
         <AbsoluteFill style={{ padding: "230px 80px 0" }}>
           <ChatHeader color="#9a917f">БҰРЫН</ChatHeader>
           <Bubble from="user" at={8}>
@@ -244,27 +244,27 @@ export const ClaudeScene: React.FC = () => {
           </Bubble>
         </AbsoluteFill>
       </Sequence>
-      <Sequence name="Ideas → structure" from={84}>
+      <Sequence name="Ideas → structure" from={70}>
         <Pipeline />
         <IdeaStorm />
         <FlashIn length={8} />
       </Sequence>
-      <Sequence from={330}>
+      <Sequence from={222}>
         <Stamp at={0} color={GOLD} rotate={-8} size={96}>
           Тіл табыстық 🤝
         </Stamp>
       </Sequence>
 
-      <Sequence name="Narration 1" durationInFrames={84}>
+      <Sequence name="Narration 1" durationInFrames={72}>
         <Narration text="Алғашында түсінісу қиын болды." bottom={200} />
       </Sequence>
-      <Sequence name="Narration 2" from={88} durationInFrames={86}>
+      <Sequence name="Narration 2" from={74} durationInFrames={44}>
         <Narration text="Қаншама идея айттым…" bottom={200} />
       </Sequence>
-      <Sequence name="Narration 3" from={176} durationInFrames={88}>
+      <Sequence name="Narration 3" from={120} durationInFrames={70}>
         <Narration text="Бірге — бір құрылым қалыптастырдық." bottom={200} />
       </Sequence>
-      <Sequence name="Narration 4" from={266} durationInFrames={94}>
+      <Sequence name="Narration 4" from={192} durationInFrames={63}>
         <Narration text="Енді Claude-пен тіл табыстық." gold bottom={200} />
       </Sequence>
 
@@ -274,19 +274,19 @@ export const ClaudeScene: React.FC = () => {
         </Sequence>
       ))}
       {IDEAS.map((_, i) => (
-        <Sequence key={i} name="SFX — idea" from={84 + 4 + i * 5}>
+        <Sequence key={i} name="SFX — idea" from={70 + 4 + i * 3}>
           <Audio src={staticFile("sfx/pop.wav")} volume={0.55} />
         </Sequence>
       ))}
-      <Sequence name="SFX — gather" from={176}>
+      <Sequence name="SFX — gather" from={120}>
         <Audio src={staticFile("sfx/whoosh.wav")} />
       </Sequence>
       {STEPS.map((step, i) => (
-        <Sequence key={step} name="SFX — step lit" from={84 + 186 + i * 7}>
+        <Sequence key={step} name="SFX — step lit" from={70 + 112 + i * 6}>
           <Audio src={staticFile("sfx/tick.wav")} volume={0.6} />
         </Sequence>
       ))}
-      <Sequence name="SFX — stamp" from={330}>
+      <Sequence name="SFX — stamp" from={222}>
         <Audio src={staticFile("sfx/boom.wav")} />
         <Audio src={staticFile("sfx/chime.wav")} volume={0.6} />
       </Sequence>
