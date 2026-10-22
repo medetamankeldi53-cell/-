@@ -1,3 +1,4 @@
+import { useT } from "./i18n";
 import { Audio } from "@remotion/media";
 import {
   AbsoluteFill,
@@ -22,6 +23,7 @@ const lines: Line[] = [
 // Эпизод II: git push против режиссёра
 export const GitScene: React.FC = () => {
   const frame = useCurrentFrame();
+  const t = useT();
   const shakeOffset =
     frame < 128 ? shake(frame, 66, 34) : shake(frame, 128, 46, 18);
 
@@ -104,13 +106,13 @@ export const GitScene: React.FC = () => {
           }}
         >
           <Bubble from="user" at={95}>
-            доступ дал, пушь
+            {t.accessGiven}
           </Bubble>
           <Bubble from="claude" at={142}>
-            снова 403 🫠
+            {t.again403}
           </Bubble>
           <Bubble from="user" at={160}>
-            Пробуй
+            {t.tryIt}
           </Bubble>
         </div>
       </AbsoluteFill>
@@ -132,7 +134,7 @@ export const GitScene: React.FC = () => {
         </Stamp>
       </Sequence>
       <Sequence durationInFrames={42}>
-        <EpisodeTitle episode="ЭПИЗОД II" title="Гит наносит ответный удар" />
+        <EpisodeTitle episode={t.ep2} title={t.ep2Title} />
       </Sequence>
 
       <Sequence name="SFX — type 1" from={48} durationInFrames={12}>

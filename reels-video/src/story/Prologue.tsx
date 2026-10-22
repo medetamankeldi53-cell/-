@@ -1,3 +1,4 @@
+import { useT } from "./i18n";
 import { Audio } from "@remotion/media";
 import {
   AbsoluteFill,
@@ -11,7 +12,8 @@ import { GOLD } from "./ui";
 // Пролог в стиле трейлера: «В мире, где…»
 export const Prologue: React.FC = () => {
   const frame = useCurrentFrame();
-  const line1 = "В мире, где Reels живут 15 секунд…";
+  const t = useT();
+  const line1 = t.prologue1;
   const typed = Math.floor(
     interpolate(frame, [6, 46], [0, line1.length], {
       extrapolateLeft: "clamp",
@@ -68,7 +70,7 @@ export const Prologue: React.FC = () => {
             scale: String(interpolate(frame, [66, 120], [1.25, 1])),
           }}
         >
-          один человек решил смонтировать шедевр
+          {t.prologue2}
         </div>
       )}
 

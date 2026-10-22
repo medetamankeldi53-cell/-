@@ -1,3 +1,4 @@
+import { useT } from "./i18n";
 import { Audio, Video } from "@remotion/media";
 import {
   AbsoluteFill,
@@ -10,11 +11,10 @@ import {
 } from "remotion";
 import { Bubble, EpisodeTitle, GOLD } from "./ui";
 
-const CAPTION = "СМОТРИ НА ПИДЖАК 👀";
-
 // Надпись, которая разлетается по буквам на кадре `explodeAt`
 const ExplodingCaption: React.FC<{ explodeAt: number }> = ({ explodeAt }) => {
   const frame = useCurrentFrame();
+  const { caption } = useT();
   const t = Math.max(0, frame - explodeAt);
   return (
     <div
@@ -31,7 +31,7 @@ const ExplodingCaption: React.FC<{ explodeAt: number }> = ({ explodeAt }) => {
         padding: "0 30px",
       }}
     >
-      {CAPTION.split(" ").map((word, w) => (
+      {caption.split(" ").map((word, w) => (
         <span key={w} style={{ display: "inline-block", whiteSpace: "nowrap" }}>
           {Array.from(word + " ").map((ch, c) => {
             const i = w * 100 + c;
@@ -62,6 +62,7 @@ const ExplodingCaption: React.FC<{ explodeAt: number }> = ({ explodeAt }) => {
 // Эпизод III: правки режиссёра, по одной
 export const EditScene: React.FC = () => {
   const frame = useCurrentFrame();
+  const t = useT();
 
   // Плитки «1» и «2» на таймлайне съезжаются в одну
   const merge = interpolate(frame, [135, 155], [0, 1], {
@@ -142,11 +143,7 @@ export const EditScene: React.FC = () => {
                 boxShadow: `0 0 ${interpolate(merge, [0, 1], [0, 60])}px ${GOLD}`,
               }}
             >
-              {merge > 0.95 && i === 0
-                ? "ОДИН"
-                : merge > 0.95
-                  ? "РОЛИК"
-                  : `Клип ${n}`}
+              {merge > 0.95 ? t.merged[i] : t.clip(n)}
             </div>
           ))}
         </div>
@@ -165,13 +162,13 @@ export const EditScene: React.FC = () => {
           }}
         >
           <Bubble from="user" at={70}>
-            Надписи убери
+            {t.removeText}
           </Bubble>
           <Bubble from="user" at={118}>
-            1 и 2 — как 1 ролик
+            {t.oneVideo}
           </Bubble>
           <Bubble from="user" at={165}>
-            Бесшовный переход через наезд
+            {t.zoomAsk}
           </Bubble>
         </div>
       </AbsoluteFill>
@@ -192,7 +189,7 @@ export const EditScene: React.FC = () => {
         />
       </Sequence>
       <Sequence durationInFrames={42}>
-        <EpisodeTitle episode="ЭПИЗОД III" title="Монтаж" />
+        <EpisodeTitle episode={t.ep3} title={t.ep3Title} />
       </Sequence>
 
       <Sequence name="SFX — pop" from={70}>

@@ -1,3 +1,4 @@
+import { useT } from "./i18n";
 import { Audio } from "@remotion/media";
 import { AbsoluteFill, Sequence, staticFile, useCurrentFrame } from "remotion";
 import { Bubble, EpisodeTitle, shake, Stamp, TypingDots } from "./ui";
@@ -5,6 +6,7 @@ import { Bubble, EpisodeTitle, shake, Stamp, TypingDots } from "./ui";
 // Эпизод I: одно слово вместо техзадания
 export const ChatScene: React.FC = () => {
   const frame = useCurrentFrame();
+  const t = useT();
 
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
@@ -18,26 +20,20 @@ export const ChatScene: React.FC = () => {
         }}
       >
         <Bubble from="user" at={50}>
-          Монтаж
+          {t.brief}
         </Bubble>
         <TypingDots from={62} to={88} />
         <Bubble from="claude" at={88}>
-          Что именно? 🤔
-          <br />
-          1. Смонтировать видео
-          <br />
-          2. Ролик из кода
-          <br />
-          3. Сценарий
-          <br />
-          4. Монтаж электрики? ⚡
+          {t.claudeAsk.map((line, i) => (
+            <div key={i}>{line}</div>
+          ))}
         </Bubble>
       </AbsoluteFill>
-      <Stamp at={125} color="#f3d28b" rotate={-12} size={84}>
-        ТЗ: 1 слово 😎
+      <Stamp at={125} color="#f3d28b" rotate={-12} size={t.briefStampSize}>
+        {t.briefStamp}
       </Stamp>
       <Sequence durationInFrames={42}>
-        <EpisodeTitle episode="ЭПИЗОД I" title="Техзадание" />
+        <EpisodeTitle episode={t.ep1} title={t.ep1Title} />
       </Sequence>
 
       <Sequence name="SFX — pop user" from={50}>

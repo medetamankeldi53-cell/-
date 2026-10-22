@@ -1,3 +1,4 @@
+import { useT } from "./i18n";
 import { Audio } from "@remotion/media";
 import {
   AbsoluteFill,
@@ -9,16 +10,10 @@ import {
 } from "remotion";
 import { GOLD, shake } from "./ui";
 
-const credits: [string, string][] = [
-  ["Режиссёр", "ты"],
-  ["Монтажёр", "Claude"],
-  ["Главный злодей", "git push (403)"],
-  ["Спецэффекты", "наезд"],
-];
-
 // Финальные титры
 export const Finale: React.FC = () => {
   const frame = useCurrentFrame();
+  const t = useT();
   const slam = (at: number) =>
     interpolate(frame, [at, at + 7], [0, 1], {
       easing: Easing.in(Easing.cubic),
@@ -66,11 +61,11 @@ export const Finale: React.FC = () => {
           scale: String(interpolate(slam(15), [0, 1], [3, 1])),
         }}
       >
-        С CLAUDE
+        {t.finaleWith}
       </div>
 
       <div style={{ marginTop: 90 }}>
-        {credits.map(([role, name], i) => (
+        {t.credits.map(([role, name], i) => (
           <div
             key={role}
             style={{
@@ -104,7 +99,7 @@ export const Finale: React.FC = () => {
           }),
         }}
       >
-        СКОРО В REELS
+        {t.soon}
       </div>
 
       <Sequence name="SFX — slam 1" from={14}>

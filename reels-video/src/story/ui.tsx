@@ -8,6 +8,7 @@ import {
   useVideoConfig,
 } from "remotion";
 import "../fonts";
+import { useT } from "./i18n";
 
 export const GOLD = "#f3d28b";
 export const MONO = "'JetBrains Mono', 'DejaVu Sans Mono', monospace";
@@ -83,6 +84,7 @@ export const Bubble: React.FC<{
   children: React.ReactNode;
 }> = ({ from, at, children }) => {
   const frame = useCurrentFrame();
+  const t = useT();
   const p = usePop(at, 13);
   if (frame < at) return null;
   const user = from === "user";
@@ -107,7 +109,7 @@ export const Bubble: React.FC<{
           padding: "0 12px",
         }}
       >
-        {user ? "Режиссёр" : "Claude"}
+        {user ? t.director : "Claude"}
       </div>
       <div
         style={{

@@ -115,6 +115,17 @@ export const RemotionRoot: React.FC = () => {
         height={1920}
         fps={30}
         durationInFrames={870}
+        defaultProps={{ lang: "ru" }}
+      />
+      {/* Казахская версия трейлера */}
+      <Composition
+        id="StoryKZ"
+        component={Story}
+        width={1080}
+        height={1920}
+        fps={30}
+        durationInFrames={870}
+        defaultProps={{ lang: "kk" }}
       />
     </>
   );
