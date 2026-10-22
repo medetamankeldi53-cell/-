@@ -1,7 +1,9 @@
 import { Audio, Video } from "@remotion/media";
 import {
   AbsoluteFill,
+  Easing,
   interpolate,
+  random,
   Sequence,
   staticFile,
   useCurrentFrame,
@@ -38,7 +40,189 @@ const ChatHeader: React.FC<{ children: React.ReactNode; color: string }> = ({
   );
 };
 
-// 8. Как нашли общий язык с Claude: «раньше» и «сейчас»
+const IDEAS: [string, number][] = [
+  ["Той бір күн. Қарыз бір жыл.", 1],
+  ["Киім — қабық қана.", 1],
+  ["Әке мен бала", 0],
+  ["1906 · Жер", 0],
+  ["1913 · Сөз", 1],
+  ["Қазір.", 0],
+  ["Уақыт куәлері", 1],
+  ["Киіз үйдегі әңгіме", 0],
+  ["«Навигация солға бұрыл» 😅", 1],
+  ["Кейіпкер картасы", 0],
+  ["Бет өзгермесін!", 1],
+  ["Постер сериясы", 0],
+  ["Субтитр", 1],
+  ["Диктор", 0],
+];
+
+// Отступ слева для каждой идеи (длинные — ближе к левому краю)
+const IDEA_X = [
+  80, 420, 200, 480, 90, 360, 150, 300, 100, 460, 220, 520, 130, 400,
+];
+
+const STEPS = [
+  "Идея",
+  "Сценарий",
+  "Кейіпкер картасы",
+  "Промпт",
+  "Генерация",
+  "Тексеру → қайта",
+  "Монтаж",
+];
+
+// Ячейки воронки: x/y центра шага на экране
+const STEP_TOP = 330;
+const STEP_H = 128;
+const STEP_GAP = 26;
+const stepCenterY = (i: number) =>
+  STEP_TOP + i * (STEP_H + STEP_GAP) + STEP_H / 2;
+
+// Идеи разлетаются по экрану, затем собираются в структуру
+const IdeaStorm: React.FC = () => {
+  const frame = useCurrentFrame();
+  return (
+    <AbsoluteFill>
+      {IDEAS.map(([text, who], i) => {
+        const appear = 4 + i * 5;
+        const p = interpolate(frame, [appear, appear + 10], [0, 1], {
+          ...clamp,
+          easing: Easing.out(Easing.back(1.6)),
+        });
+        // Стартовая точка: идеи рассыпаны по всему кадру и не перекрывают друг друга
+        const x0 = IDEA_X[i];
+        const y0 = 270 + i * 80;
+        const drift = Math.sin((frame + i * 13) / 14) * 14;
+        // Сборка в шаг воронки
+        const gather = interpolate(frame, [95 + i * 2, 125 + i * 2], [0, 1], {
+          ...clamp,
+          easing: Easing.inOut(Easing.cubic),
+        });
+        const target = i % STEPS.length;
+        const x = x0 + (540 - 200 - x0) * gather;
+        const y =
+          y0 + drift * (1 - gather) + (stepCenterY(target) - 40 - y0) * gather;
+        return (
+          <div
+            key={i}
+            style={{
+              position: "absolute",
+              left: x,
+              top: y,
+              fontSize: 40,
+              fontWeight: 700,
+              padding: "16px 28px",
+              borderRadius: 30,
+              whiteSpace: "nowrap",
+              color: who === 0 ? "#fff" : "#1b1712",
+              backgroundColor: who === 0 ? "#2f6bff" : "#f4ead7",
+              boxShadow: "0 12px 30px rgba(0,0,0,0.45)",
+              rotate: `${(random(`ir${i}`) - 0.5) * 16 * (1 - gather)}deg`,
+              scale: String(p * interpolate(gather, [0, 1], [1, 0.35])),
+              opacity: p * interpolate(gather, [0.6, 1], [1, 0], clamp),
+            }}
+          >
+            {text}
+          </div>
+        );
+      })}
+    </AbsoluteFill>
+  );
+};
+
+// Структура работы: шаги появляются, потом по очереди «загораются»
+const Pipeline: React.FC = () => {
+  const frame = useCurrentFrame();
+  const line = interpolate(frame, [100, 150], [0, 1], clamp);
+  return (
+    <AbsoluteFill>
+      <div
+        style={{
+          position: "absolute",
+          top: 220,
+          left: 0,
+          right: 0,
+          textAlign: "center",
+          fontSize: 50,
+          fontWeight: 900,
+          letterSpacing: 12,
+          color: GOLD,
+          opacity: interpolate(frame, [100, 112], [0, 1], clamp),
+        }}
+      >
+        ЖҰМЫС ҚҰРЫЛЫМЫ
+      </div>
+      <div
+        style={{
+          position: "absolute",
+          left: 222,
+          top: stepCenterY(0),
+          width: 6,
+          height: (stepCenterY(STEPS.length - 1) - stepCenterY(0)) * line,
+          backgroundColor: GOLD,
+          opacity: 0.6,
+        }}
+      />
+      {STEPS.map((step, i) => {
+        const appear = 104 + i * 6;
+        const p = interpolate(frame, [appear, appear + 10], [0, 1], {
+          ...clamp,
+          easing: Easing.out(Easing.back(1.4)),
+        });
+        const lit = frame >= 186 + i * 7;
+        return (
+          <div
+            key={step}
+            style={{
+              position: "absolute",
+              left: 170,
+              top: stepCenterY(i) - STEP_H / 2,
+              width: 740,
+              height: STEP_H,
+              display: "flex",
+              alignItems: "center",
+              gap: 34,
+              opacity: p,
+              translate: `${(1 - p) * 120}px 0px`,
+            }}
+          >
+            <div
+              style={{
+                width: 110,
+                height: 110,
+                borderRadius: 55,
+                backgroundColor: lit ? GOLD : "#1e2130",
+                border: `4px solid ${GOLD}`,
+                color: lit ? "#1b1712" : GOLD,
+                fontSize: 52,
+                fontWeight: 900,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                boxShadow: lit ? `0 0 40px ${GOLD}` : undefined,
+              }}
+            >
+              {lit ? "✓" : i + 1}
+            </div>
+            <div
+              style={{
+                flex: 1,
+                fontSize: 52,
+                fontWeight: 800,
+                color: lit ? "#fff" : "#cfc8b8",
+              }}
+            >
+              {step}
+            </div>
+          </div>
+        );
+      })}
+    </AbsoluteFill>
+  );
+};
+
+// 8. Как нашли общий язык с Claude: непонимание → поток идей → общая структура
 export const ClaudeScene: React.FC = () => {
   return (
     <AbsoluteFill
@@ -47,63 +231,64 @@ export const ClaudeScene: React.FC = () => {
         fontFamily: "Montserrat",
       }}
     >
-      <Sequence name="Before" durationInFrames={100}>
+      <Sequence name="Before" durationInFrames={84}>
         <AbsoluteFill style={{ padding: "230px 80px 0" }}>
           <ChatHeader color="#9a917f">БҰРЫН</ChatHeader>
-          <Bubble from="user" at={10}>
+          <Bubble from="user" at={8}>
             Монтаж
           </Bubble>
-          <Bubble from="claude" at={28}>
+          <Bubble from="claude" at={24}>
             Нақты не керек? 🤔
             <br />
             1… 2… 3… 4…
           </Bubble>
         </AbsoluteFill>
       </Sequence>
-      <Sequence name="Now" from={100}>
-        <AbsoluteFill style={{ padding: "230px 80px 0" }}>
-          <ChatHeader color={GOLD}>ҚАЗІР</ChatHeader>
-          <Bubble from="user" at={8}>
-            Бесшовный переход через наезд
-          </Bubble>
-          <Bubble from="claude" at={24}>
-            Дайын 🎬 ✓
-          </Bubble>
-          <Bubble from="user" at={46}>
-            Қазақша істей аласың ба?
-          </Bubble>
-          <Bubble from="claude" at={60}>
-            Иә, жасаймын! ✓
-          </Bubble>
-        </AbsoluteFill>
+      <Sequence name="Ideas → structure" from={84}>
+        <Pipeline />
+        <IdeaStorm />
         <FlashIn length={8} />
       </Sequence>
-      <Sequence from={186}>
+      <Sequence from={330}>
         <Stamp at={0} color={GOLD} rotate={-8} size={96}>
           Тіл табыстық 🤝
         </Stamp>
       </Sequence>
 
-      <Sequence name="Narration 1" durationInFrames={100}>
-        <Narration text="Алғашында түсінісу қиын болды." bottom={240} />
+      <Sequence name="Narration 1" durationInFrames={84}>
+        <Narration text="Алғашында түсінісу қиын болды." bottom={200} />
       </Sequence>
-      <Sequence name="Narration 2" from={104} durationInFrames={136}>
-        <Narration text="Қазір — Claude-пен тіл табыстық." gold bottom={240} />
+      <Sequence name="Narration 2" from={88} durationInFrames={86}>
+        <Narration text="Қаншама идея айттым…" bottom={200} />
+      </Sequence>
+      <Sequence name="Narration 3" from={176} durationInFrames={88}>
+        <Narration text="Бірге — бір құрылым қалыптастырдық." bottom={200} />
+      </Sequence>
+      <Sequence name="Narration 4" from={266} durationInFrames={94}>
+        <Narration text="Енді Claude-пен тіл табыстық." gold bottom={200} />
       </Sequence>
 
-      {[10, 28, 108, 124, 146, 160].map((f) => (
+      {[8, 24].map((f) => (
         <Sequence key={f} name="SFX — pop" from={f}>
           <Audio src={staticFile("sfx/pop.wav")} />
         </Sequence>
       ))}
-      <Sequence name="SFX — switch" from={98}>
-        <Audio src={staticFile("sfx/whoosh.wav")} volume={0.6} />
+      {IDEAS.map((_, i) => (
+        <Sequence key={i} name="SFX — idea" from={84 + 4 + i * 5}>
+          <Audio src={staticFile("sfx/pop.wav")} volume={0.55} />
+        </Sequence>
+      ))}
+      <Sequence name="SFX — gather" from={176}>
+        <Audio src={staticFile("sfx/whoosh.wav")} />
       </Sequence>
-      <Sequence name="SFX — done" from={124}>
-        <Audio src={staticFile("sfx/chime.wav")} volume={0.6} />
-      </Sequence>
-      <Sequence name="SFX — stamp" from={186}>
+      {STEPS.map((step, i) => (
+        <Sequence key={step} name="SFX — step lit" from={84 + 186 + i * 7}>
+          <Audio src={staticFile("sfx/tick.wav")} volume={0.6} />
+        </Sequence>
+      ))}
+      <Sequence name="SFX — stamp" from={330}>
         <Audio src={staticFile("sfx/boom.wav")} />
+        <Audio src={staticFile("sfx/chime.wav")} volume={0.6} />
       </Sequence>
     </AbsoluteFill>
   );

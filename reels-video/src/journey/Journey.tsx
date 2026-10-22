@@ -13,7 +13,7 @@ import { ClaudeScene, LatestScene } from "./Growth";
 import { TrashScene } from "./Trash";
 
 // «Уақыт» — ролик о пути: от первого фото до готовых работ.
-// 120 + 180 + 240 + 210 + 210 + 210 + 180 + 240 + 360 + 540 + 150 = 2640 кадров = 88 с
+// 120 + 180 + 240 + 210 + 210 + 210 + 180 + 360 + 360 + 540 + 150 = 2760 кадров = 92 с
 export const Journey: React.FC = () => {
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
@@ -39,7 +39,7 @@ export const Journey: React.FC = () => {
         <Series.Sequence name="7 Nights" durationInFrames={180}>
           <NightsScene />
         </Series.Sequence>
-        <Series.Sequence name="8 Claude" durationInFrames={240}>
+        <Series.Sequence name="8 Claude" durationInFrames={360}>
           <ClaudeScene />
         </Series.Sequence>
         <Series.Sequence name="9 Payoff" durationInFrames={360}>
@@ -56,7 +56,7 @@ export const Journey: React.FC = () => {
       <CinemaLook />
 
       <Audio src={staticFile("sfx/drone.wav")} volume={0.55} loop />
-      <Sequence name="SFX — riser to payoff" from={1545}>
+      <Sequence name="SFX — riser to payoff" from={1665}>
         <Audio src={staticFile("sfx/riser.wav")} volume={0.6} />
       </Sequence>
     </AbsoluteFill>

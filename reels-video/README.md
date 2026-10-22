@@ -37,10 +37,10 @@ npx remotion render StoryKZ out/story-kz.mp4 # қазақша
 
 ## «Уақыт» — путь автора (`Journey`)
 
-`src/journey/` — ролик 88 с на казахском: ночь → первое фото → персонажи → Claude/Gemini/GPT и промпты →
+`src/journey/` — ролик 92 с на казахском: ночь → первое фото → персонажи → Claude/Gemini/GPT и промпты →
 брак и глитчи → корзина телефона (1247 фото) → ночные часы → «тіл табыстық» с Claude → монтаж работ →
 последние работы «Уақыт куәлері» (1906, 1913, ҚАЗІР) → «Уақыт кетті. Бірақ бекер емес.»
-Материалы — `public/journey/`. Текст диктора с таймингом — `DIKTOR_KZ.md`.
+Материалы — `public/journey/`. Текст диктора для ElevenLabs с таймингом — `ELEVENLABS_KZ.md`.
 
 ```bash
 npx remotion render Journey out/journey.mp4
