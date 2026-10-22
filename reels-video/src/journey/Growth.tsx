@@ -7,6 +7,7 @@ import {
   Sequence,
   staticFile,
   useCurrentFrame,
+  useVideoConfig,
 } from "remotion";
 import { Bubble, Stamp } from "../story/ui";
 import { FlashIn, GOLD, Narration, PosterCard } from "./kit";
@@ -298,7 +299,10 @@ export const ClaudeScene: React.FC = () => {
 };
 
 // Горизонтальный клип в вертикальном кадре: размытый фон + чистая «плёнка» по центру
-const CinemaClip: React.FC<{ src: string }> = ({ src }) => {
+const CinemaClip: React.FC<{ src: string; playbackRate?: number }> = ({
+  src,
+  playbackRate = 1,
+}) => {
   const frame = useCurrentFrame();
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
@@ -307,6 +311,7 @@ const CinemaClip: React.FC<{ src: string }> = ({ src }) => {
       >
         <Video
           src={staticFile(src)}
+          playbackRate={playbackRate}
           muted
           objectFit="cover"
           style={{ width: "100%", height: "100%" }}
@@ -330,11 +335,74 @@ const CinemaClip: React.FC<{ src: string }> = ({ src }) => {
         >
           <Video
             src={staticFile(src)}
+            playbackRate={playbackRate}
             objectFit="cover"
             style={{ width: "100%", height: "100%" }}
           />
         </div>
       </AbsoluteFill>
+    </AbsoluteFill>
+  );
+};
+
+// Эффект перемотки «▶▶ 2×»: мигающий значок и полосы скорости по краям
+const FastForward: React.FC = () => {
+  const frame = useCurrentFrame();
+  const { durationInFrames } = useVideoConfig();
+  const fade = interpolate(
+    frame,
+    [0, 6, durationInFrames - 6, durationInFrames],
+    [0, 1, 1, 0],
+    clamp,
+  );
+  return (
+    <AbsoluteFill style={{ opacity: fade, pointerEvents: "none" }}>
+      {new Array(14).fill(0).map((_, i) => {
+        const y = 140 + random(`fy${i}`) * 1640;
+        const len = 120 + random(`fl${i}`) * 260;
+        const speed = 70 + random(`fs${i}`) * 60;
+        const left = i % 2 === 0;
+        const x = ((frame * speed + random(`fx${i}`) * 1400) % 1500) - 300;
+        return (
+          <div
+            key={i}
+            style={{
+              position: "absolute",
+              top: y,
+              left: left ? x * 0.18 - 60 : undefined,
+              right: left ? undefined : x * 0.18 - 60,
+              width: len,
+              height: 4,
+              borderRadius: 2,
+              background: left
+                ? "linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.55))"
+                : "linear-gradient(270deg, rgba(255,255,255,0), rgba(255,255,255,0.55))",
+            }}
+          />
+        );
+      })}
+      <div
+        style={{
+          position: "absolute",
+          top: 170,
+          right: 70,
+          display: "flex",
+          alignItems: "center",
+          gap: 14,
+          padding: "14px 30px",
+          borderRadius: 18,
+          backgroundColor: "rgba(0,0,0,0.55)",
+          border: `3px solid ${GOLD}`,
+          fontFamily: "Montserrat",
+          fontSize: 54,
+          fontWeight: 900,
+          color: GOLD,
+          opacity: frame % 20 < 14 ? 1 : 0.45,
+          textShadow: `0 0 24px ${GOLD}`,
+        }}
+      >
+        ▶▶ 2×
+      </div>
     </AbsoluteFill>
   );
 };
@@ -376,7 +444,7 @@ export const LatestScene: React.FC = () => {
         <FlashIn />
       </Sequence>
       <Sequence name="Clip — 1906" from={90} durationInFrames={75}>
-        <CinemaClip src="journey/ep1906.mp4" />
+        <CinemaClip src="journey/ep1906.mp4" playbackRate={2} />
         <FlashIn length={6} />
       </Sequence>
       <Sequence name="Poster — 1913" from={165} durationInFrames={40}>
@@ -384,12 +452,16 @@ export const LatestScene: React.FC = () => {
         <FlashIn />
       </Sequence>
       <Sequence name="Clip — car" from={205} durationInFrames={100}>
-        <CinemaClip src="journey/car.mp4" />
+        <CinemaClip src="journey/car.mp4" playbackRate={2} />
         <FlashIn length={6} />
       </Sequence>
       <Sequence name="Poster — ҚАЗІР" from={305} durationInFrames={55}>
         <PosterCard src="journey/poster-kazir.jpg" />
         <FlashIn />
+      </Sequence>
+
+      <Sequence name="Fast-forward 2×" from={60} durationInFrames={270}>
+        <FastForward />
       </Sequence>
 
       <Sequence name="SFX — title" from={2}>
