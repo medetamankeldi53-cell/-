@@ -6,7 +6,7 @@ import {
   staticFile,
   useCurrentFrame,
 } from "remotion";
-import { shake } from "../story/ui";
+import { Bubble, shake, TypingDots } from "../story/ui";
 import { FlashIn, GOLD, Narration, Photo, PosterCard } from "./kit";
 
 const clamp = {
@@ -90,24 +90,74 @@ export const FinaleScene: React.FC = () => {
         >
           Бірақ бекер емес.
         </div>
+      </AbsoluteFill>
+
+      <Sequence name="SFX — slam" from={55}>
+        <Audio src={staticFile("sfx/boom.wav")} />
+      </Sequence>
+    </AbsoluteFill>
+  );
+};
+
+// 12. Аутро без диктора: Claude пишет, что впереди ещё много работы
+export const ClaudeOutroScene: React.FC = () => {
+  const frame = useCurrentFrame();
+  return (
+    <AbsoluteFill
+      style={{
+        background: "linear-gradient(180deg, #14161f 0%, #0b0c12 100%)",
+        fontFamily: "Montserrat",
+      }}
+    >
+      <AbsoluteFill
+        style={{
+          justifyContent: "center",
+          padding: "0 80px 260px",
+        }}
+      >
+        <TypingDots from={4} to={26} />
+        <Bubble from="claude" at={26}>
+          Алда әлі талай жұмыс бар 💪
+        </Bubble>
+        <TypingDots from={38} to={54} />
+        <Bubble from="claude" at={54}>
+          Жалғастырамыз! 🎬
+        </Bubble>
+      </AbsoluteFill>
+      <AbsoluteFill
+        style={{
+          justifyContent: "flex-end",
+          alignItems: "center",
+          paddingBottom: 300,
+        }}
+      >
         <div
           style={{
-            marginTop: 120,
-            fontSize: 46,
-            fontWeight: 600,
-            letterSpacing: 14,
-            color: "#e9e2d4",
-            opacity: interpolate(frame, [100, 115], [0, 1], clamp),
+            fontSize: 50,
+            fontWeight: 700,
+            letterSpacing: 16,
+            color: GOLD,
+            textShadow: `0 0 40px ${GOLD}88`,
+            opacity: interpolate(frame, [84, 100], [0, 1], clamp),
           }}
         >
           ЖАЛҒАСЫ БАР…
         </div>
       </AbsoluteFill>
 
-      <Sequence name="SFX — slam" from={55}>
-        <Audio src={staticFile("sfx/boom.wav")} />
+      <Sequence name="SFX — typing 1" from={4} durationInFrames={22}>
+        <Audio src={staticFile("sfx/type.wav")} volume={0.4} />
       </Sequence>
-      <Sequence name="SFX — end" from={100}>
+      <Sequence name="SFX — pop 1" from={26}>
+        <Audio src={staticFile("sfx/pop.wav")} />
+      </Sequence>
+      <Sequence name="SFX — typing 2" from={38} durationInFrames={16}>
+        <Audio src={staticFile("sfx/type.wav")} volume={0.4} />
+      </Sequence>
+      <Sequence name="SFX — pop 2" from={54}>
+        <Audio src={staticFile("sfx/pop.wav")} />
+      </Sequence>
+      <Sequence name="SFX — end" from={84}>
         <Audio src={staticFile("sfx/chime.wav")} volume={0.6} />
       </Sequence>
     </AbsoluteFill>

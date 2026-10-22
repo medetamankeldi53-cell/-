@@ -2,7 +2,7 @@ import { Audio } from "@remotion/media";
 import { AbsoluteFill, Sequence, Series, staticFile } from "remotion";
 import { CinemaLook } from "../story/ui";
 import { FirstPhotoScene, NightScene } from "./Opening";
-import { FinaleScene, PayoffScene } from "./Payoff";
+import { ClaudeOutroScene, FinaleScene, PayoffScene } from "./Payoff";
 import {
   CharactersScene,
   FailsScene,
@@ -14,7 +14,7 @@ import { TrashScene } from "./Trash";
 import { Voiceover } from "./Voiceover";
 
 // «Уақыт» — ролик о пути: от первого фото до готовых работ.
-// 90 + 125 + 185 + 165 + 170 + 165 + 140 + 255 + 145 + 540 + 150 = 2130 кадров = 71 с
+// 90 + 125 + 185 + 165 + 170 + 165 + 140 + 255 + 145 + 540 + 120 + 130 = 2230 кадров ≈ 74 с
 export const Journey: React.FC = () => {
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
@@ -49,8 +49,11 @@ export const Journey: React.FC = () => {
         <Series.Sequence name="10 Latest works" durationInFrames={540}>
           <LatestScene />
         </Series.Sequence>
-        <Series.Sequence name="11 Finale" durationInFrames={150}>
+        <Series.Sequence name="11 Finale" durationInFrames={120}>
           <FinaleScene />
+        </Series.Sequence>
+        <Series.Sequence name="12 Claude outro" durationInFrames={130}>
+          <ClaudeOutroScene />
         </Series.Sequence>
       </Series>
 
