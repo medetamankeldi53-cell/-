@@ -387,7 +387,7 @@ export const Witness: React.FC = () => {
           <Sequence name="Heartbeat" from={45} durationInFrames={225}>
             <Audio
               src={staticFile("sfx/heartbeat.wav")}
-              volume={(f) => interpolate(f, [0, 200], [0.3, 1], clamp)}
+              volume={(f) => interpolate(f, [0, 200], [0.2, 0.55], clamp)}
             />
           </Sequence>
           <Sequence name="SFX — rise" from={270}>
