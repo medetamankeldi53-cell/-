@@ -13,6 +13,7 @@ import {
   ArchivePrint,
   FilmFlicker,
   FlashMontage,
+  FilmPan,
   InkSpread,
   LightLeak,
   SERIF,
@@ -34,10 +35,9 @@ const SHOTS = [
   "witness/baitursynov1913.jpg",
   "witness/teacher.jpg",
   "witness/map1916.jpg",
-  "witness/cossack1911.jpg",
 ];
-const HOOK_FRAMES = [6, 6, 5, 5, 4, 4, 4, 4, 7];
-const RECAP_FRAMES = [6, 5, 5, 4, 4, 4, 3, 3, 6];
+const HOOK_FRAMES = [6, 6, 6, 5, 5, 5, 5, 7];
+const RECAP_FRAMES = [7, 6, 5, 5, 5, 4, 4, 4];
 
 // Хук: шквал архивных кадров и «110 жыл бұрын…» — чтобы не пролистали
 const Hook: React.FC = () => {
@@ -206,7 +206,8 @@ const Outro: React.FC = () => {
           }}
         >
           Архив: С. Прокудин-Горский (1911), С. Дудин (1899), «Қазақ» газеті
-          (1913) — Wikimedia Commons, public domain. Постерлер — AI.
+          (1913) — Wikimedia Commons, public domain. Постерлер мен «Тізім» кадры
+          — AI.
         </div>
       </AbsoluteFill>
     </AbsoluteFill>
@@ -351,12 +352,10 @@ export const Witness: React.FC = () => {
             />
             <Narration text="25 маусым. *Патша* *жарлығы.*" bottom={230} />
           </Sequence>
-          <Sequence name="Cossack" from={125} durationInFrames={145}>
-            <ArchivePrint
-              src="witness/cossack1911.jpg"
-              ratio={1.088}
-              caption="Жетісу казагы, 1911 · С. Прокудин-Горский"
-              rotate={1}
+          <Sequence name="Тізім (AI-кадр)" from={125} durationInFrames={145}>
+            <FilmPan
+              src="witness/tizim-ai.jpg"
+              caption="«1916. Тізім» эпизодынан · AI-кадр"
             />
             <Narration
               text="19–43 жастағы ер-азаматтарды *тыл* *жұмысына* алу бұйырылды."

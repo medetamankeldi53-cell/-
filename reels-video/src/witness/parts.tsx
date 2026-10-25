@@ -365,3 +365,59 @@ export const FilmFlicker: React.FC = () => {
     </AbsoluteFill>
   );
 };
+
+// Кинокадр (не архив): камера проезжает по широкому кадру слева направо.
+// Подпись честно помечает кадр как AI, чтобы его не путали с архивными фото.
+export const FilmPan: React.FC<{ src: string; caption: string }> = ({
+  src,
+  caption,
+}) => {
+  const frame = useCurrentFrame();
+  const { durationInFrames } = useVideoConfig();
+  const p = interpolate(frame, [0, durationInFrames], [0, 1], {
+    ...clamp,
+    easing: Easing.inOut(Easing.sin),
+  });
+  return (
+    <AbsoluteFill style={{ backgroundColor: "#000", overflow: "hidden" }}>
+      <Img
+        src={staticFile(src)}
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          objectPosition: `${5 + p * 90}% 50%`,
+          scale: String(
+            interpolate(frame, [0, durationInFrames], [1.12, 1.04]),
+          ),
+          filter: "contrast(1.05) saturate(0.95)",
+        }}
+      />
+      <AbsoluteFill
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0) 60%, rgba(0,0,0,0.7) 100%)",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          top: 150,
+          left: 0,
+          right: 0,
+          textAlign: "center",
+          fontFamily: SERIF,
+          fontStyle: "italic",
+          fontSize: 36,
+          fontWeight: 500,
+          color: "#e6dfd0",
+          opacity: interpolate(frame, [8, 20], [0, 0.9], clamp),
+          textShadow: "0 2px 12px rgba(0,0,0,0.8)",
+        }}
+      >
+        {caption}
+      </div>
+      <LightLeak seed="pan" length={14} />
+    </AbsoluteFill>
+  );
+};
