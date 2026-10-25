@@ -3,6 +3,7 @@ import { Montage } from "./montage/Montage";
 import { JourneyCover } from "./journey/Cover";
 import { Journey } from "./journey/Journey";
 import { ReelsVideo } from "./ReelsVideo";
+import { Witness } from "./witness/Witness";
 import { CtaScene } from "./scenes/CtaScene";
 import { HookScene } from "./scenes/HookScene";
 import { PointScene } from "./scenes/PointScene";
@@ -144,6 +145,15 @@ export const RemotionRoot: React.FC = () => {
         component={JourneyCover}
         width={1080}
         height={1920}
+      />
+      {/* «Уақыт куәлері: 1906–1916» — архивный документальный монтаж, 1190 кадров ≈ 40 с */}
+      <Composition
+        id="Witness"
+        component={Witness}
+        width={1080}
+        height={1920}
+        fps={30}
+        durationInFrames={1190}
       />
     </>
   );
