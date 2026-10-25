@@ -4,7 +4,7 @@ import { GOLD } from "./kit";
 
 const SERIF = "'Cormorant Garamond', serif";
 
-// Обложка Reels «Уақыт» на синем фоне в стиле постеров «Уақыт куәлері»
+// Обложка Reels «Уақыт» на синем фоне в стиле постеров «Уақыт куәлары»
 export const JourneyCover: React.FC = () => {
   return (
     <AbsoluteFill
@@ -42,7 +42,7 @@ export const JourneyCover: React.FC = () => {
           color: GOLD,
         }}
       >
-        УАҚЫТ КУӘЛЕРІ
+        УАҚЫТ КУӘЛАРЫ
       </div>
       <div
         style={{

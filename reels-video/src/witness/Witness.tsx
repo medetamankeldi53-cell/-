@@ -16,7 +16,7 @@ const clamp = {
   extrapolateRight: "clamp",
 } as const;
 
-// Заставка: «УАҚЫТ КУӘЛЕРІ · 1906 — 1916»
+// Заставка: «УАҚЫТ КУӘЛАРЫ · 1906 — 1916»
 const Intro: React.FC = () => {
   const frame = useCurrentFrame();
   return (
@@ -38,7 +38,7 @@ const Intro: React.FC = () => {
           opacity: interpolate(frame, [10, 30], [0, 1], clamp),
         }}
       >
-        УАҚЫТ КУӘЛЕРІ
+        УАҚЫТ КУӘЛАРЫ
       </div>
       <div
         style={{
@@ -73,7 +73,7 @@ const Intro: React.FC = () => {
   );
 };
 
-// Финал: «Олар — уақыттың куәлері. Біз — олардың жалғасы.» + источники
+// Финал: «Олар — уақыттың куәлары. Біз — олардың жалғасы.» + источники
 const Outro: React.FC = () => {
   const frame = useCurrentFrame();
   return (
@@ -82,7 +82,7 @@ const Outro: React.FC = () => {
         <ArchivePrint src="witness/nomads1911.jpg" ratio={1.076} caption="" />
       </AbsoluteFill>
       <Sequence durationInFrames={78}>
-        <Narration text="Олар — *уақыттың* *куәлері.*" size={84} bottom={900} />
+        <Narration text="Олар — *уақыттың* *куәлары.*" size={84} bottom={900} />
       </Sequence>
       <Sequence from={78}>
         <Narration text="Біз — олардың *жалғасы.*" size={84} bottom={900} />
@@ -105,7 +105,7 @@ const Outro: React.FC = () => {
             color: GOLD,
           }}
         >
-          УАҚЫТ КУӘЛЕРІ
+          УАҚЫТ КУӘЛАРЫ
         </div>
         <div
           style={{
@@ -127,7 +127,7 @@ const Outro: React.FC = () => {
   );
 };
 
-// «Уақыт куәлері: 1906–1916» — документальный монтаж из архивных фото
+// «Уақыт куәлары: 1906–1916» — документальный монтаж из архивных фото
 // 120 + 180 + 210 + 290 + 360 + 150 = 1310 кадров ≈ 44 с
 export const Witness: React.FC = () => {
   return (
