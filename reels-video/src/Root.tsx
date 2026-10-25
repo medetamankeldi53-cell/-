@@ -146,14 +146,14 @@ export const RemotionRoot: React.FC = () => {
         width={1080}
         height={1920}
       />
-      {/* «Уақыт куәлері: 1906–1916» — архивный документальный монтаж, 1190 кадров ≈ 40 с */}
+      {/* «Уақыт куәлері: 1906–1916» — архивный документальный монтаж, 1310 кадров ≈ 44 с */}
       <Composition
         id="Witness"
         component={Witness}
         width={1080}
         height={1920}
         fps={30}
-        durationInFrames={1190}
+        durationInFrames={1310}
       />
     </>
   );

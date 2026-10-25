@@ -128,7 +128,7 @@ const Outro: React.FC = () => {
 };
 
 // «Уақыт куәлері: 1906–1916» — документальный монтаж из архивных фото
-// 120 + 180 + 210 + 290 + 240 + 150 = 1190 кадров ≈ 40 с
+// 120 + 180 + 210 + 290 + 360 + 150 = 1310 кадров ≈ 44 с
 export const Witness: React.FC = () => {
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
@@ -188,7 +188,7 @@ export const Witness: React.FC = () => {
           <Sequence name="Poster 1906" from={150} durationInFrames={60}>
             <PosterCard src="journey/poster-1906.jpg" />
           </Sequence>
-          <Sequence name="SFX — year" >
+          <Sequence name="SFX — year">
             <Audio src={staticFile("sfx/boom.wav")} />
           </Sequence>
           <Sequence name="SFX — poster" from={150}>
@@ -240,7 +240,7 @@ export const Witness: React.FC = () => {
           <Sequence name="Poster 1913" from={230} durationInFrames={60}>
             <PosterCard src="journey/poster-1913.jpg" />
           </Sequence>
-          <Sequence name="SFX — year" >
+          <Sequence name="SFX — year">
             <Audio src={staticFile("sfx/boom.wav")} />
           </Sequence>
           <Sequence name="SFX — poster" from={230}>
@@ -249,7 +249,7 @@ export const Witness: React.FC = () => {
         </Series.Sequence>
 
         {/* 1916 · Көтеріліс */}
-        <Series.Sequence name="1916 Uprising" durationInFrames={240}>
+        <Series.Sequence name="1916 Uprising" durationInFrames={360}>
           <Sequence name="Year" durationInFrames={45}>
             <YearCard year="1916" word="КӨТЕРІЛІС" />
           </Sequence>
@@ -278,7 +278,19 @@ export const Witness: React.FC = () => {
             <AbsoluteFill style={{ backgroundColor: "#07070a" }} />
             <Narration text="Дала *көтерілді.*" size={110} bottom={880} />
           </Sequence>
-          <Sequence name="SFX — year" >
+          <Sequence name="SFX — year">
+            <Audio src={staticFile("sfx/boom.wav")} />
+          </Sequence>
+          <Sequence name="Poster 1916 — Себеп" from={240} durationInFrames={60}>
+            <PosterCard src="journey/poster-1916-sebep.jpg" />
+          </Sequence>
+          <Sequence name="Poster 1916 — Тізім" from={300} durationInFrames={60}>
+            <PosterCard src="journey/poster-1916-tizim.jpg" />
+          </Sequence>
+          <Sequence name="SFX — poster sebep" from={240}>
+            <Audio src={staticFile("sfx/whoosh.wav")} volume={0.6} />
+          </Sequence>
+          <Sequence name="SFX — poster tizim" from={300}>
             <Audio src={staticFile("sfx/boom.wav")} />
           </Sequence>
           <Sequence name="SFX — rise" from={195}>
@@ -296,7 +308,7 @@ export const Witness: React.FC = () => {
 
       <Audio src={staticFile("sfx/drone.wav")} volume={0.45} loop />
       <Audio src={staticFile("sfx/projector.wav")} volume={0.35} loop />
-      <Sequence name="SFX — outro" from={1040}>
+      <Sequence name="SFX — outro" from={1160}>
         <Audio src={staticFile("sfx/chime.wav")} volume={0.5} />
       </Sequence>
     </AbsoluteFill>
