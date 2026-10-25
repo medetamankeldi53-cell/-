@@ -9,13 +9,93 @@ import {
 } from "remotion";
 import { GOLD, Narration, PosterCard } from "../journey/kit";
 import { CinemaLook } from "../story/ui";
-import { ArchivePrint, FilmFlicker, SERIF, YearCard } from "./parts";
+import {
+  ArchivePrint,
+  FilmFlicker,
+  FlashMontage,
+  InkSpread,
+  LightLeak,
+  SERIF,
+  YearCard,
+} from "./parts";
 import { WitnessVoiceover } from "./Voiceover";
 
 const clamp = {
   extrapolateLeft: "clamp",
   extrapolateRight: "clamp",
 } as const;
+
+const SHOTS = [
+  "witness/nomads1911.jpg",
+  "witness/eagle.jpg",
+  "witness/settlers1911.jpg",
+  "witness/saukele1899.jpg",
+  "witness/qazaq1913.jpg",
+  "witness/baitursynov1913.jpg",
+  "witness/teacher.jpg",
+  "witness/map1916.jpg",
+  "witness/cossack1911.jpg",
+];
+const HOOK_FRAMES = [6, 6, 5, 5, 4, 4, 4, 4, 7];
+const RECAP_FRAMES = [6, 5, 5, 4, 4, 4, 3, 3, 6];
+
+// Хук: шквал архивных кадров и «110 жыл бұрын…» — чтобы не пролистали
+const Hook: React.FC = () => {
+  const frame = useCurrentFrame();
+  return (
+    <AbsoluteFill>
+      <FlashMontage shots={SHOTS} frames={HOOK_FRAMES} />
+      <AbsoluteFill
+        style={{
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "rgba(0,0,0,0.35)",
+        }}
+      >
+        <div
+          style={{
+            fontFamily: SERIF,
+            fontSize: 120,
+            fontWeight: 700,
+            color: "#f4efe4",
+            textShadow: "0 6px 40px rgba(0,0,0,0.9)",
+            scale: String(interpolate(frame, [0, 45], [1.25, 1], clamp)),
+          }}
+        >
+          110 жыл бұрын…
+        </div>
+      </AbsoluteFill>
+      {HOOK_FRAMES.map((_, i) => (
+        <Sequence
+          key={i}
+          from={HOOK_FRAMES.slice(0, i).reduce((a, b) => a + b, 0)}
+        >
+          <Audio src={staticFile("sfx/shutter.wav")} volume={0.7} />
+        </Sequence>
+      ))}
+      <Sequence from={38}>
+        <Audio src={staticFile("sfx/boom.wav")} />
+      </Sequence>
+    </AbsoluteFill>
+  );
+};
+
+// Рекап перед финалом: все кадры ускоряющимся ритмом
+const Recap: React.FC = () => {
+  return (
+    <AbsoluteFill>
+      <FlashMontage shots={[...SHOTS].reverse()} frames={RECAP_FRAMES} />
+      {RECAP_FRAMES.map((_, i) => (
+        <Sequence
+          key={i}
+          from={RECAP_FRAMES.slice(0, i).reduce((a, b) => a + b, 0)}
+        >
+          <Audio src={staticFile("sfx/shutter.wav")} volume={0.7} />
+        </Sequence>
+      ))}
+    </AbsoluteFill>
+  );
+};
 
 // Заставка: «УАҚЫТ КУӘЛАРЫ · 1906 — 1916»
 const Intro: React.FC = () => {
@@ -80,7 +160,12 @@ const Outro: React.FC = () => {
   return (
     <AbsoluteFill style={{ backgroundColor: "#07070a" }}>
       <AbsoluteFill style={{ opacity: 0.22, filter: "blur(3px) sepia(0.5)" }}>
-        <ArchivePrint src="witness/nomads1911.jpg" ratio={1.076} caption="" />
+        <ArchivePrint
+          src="witness/nomads1911.jpg"
+          ratio={1.076}
+          caption=""
+          silent
+        />
       </AbsoluteFill>
       <Sequence durationInFrames={78}>
         <Narration text="Олар — *уақыттың* *куәлары.*" size={84} bottom={900} />
@@ -129,11 +214,14 @@ const Outro: React.FC = () => {
 };
 
 // «Уақыт куәлары: 1906–1916» — документальный монтаж из архивных фото
-// 150 + 180 + 237 + 347 + 440 + 150 = 1504 кадров ≈ 50 с
+// 45 + 150 + 180 + 237 + 347 + 440 + 40 + 150 = 1589 кадров ≈ 53 с
 export const Witness: React.FC = () => {
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
       <Series>
+        <Series.Sequence name="Hook" durationInFrames={45}>
+          <Hook />
+        </Series.Sequence>
         <Series.Sequence name="Intro" durationInFrames={150}>
           <Intro />
         </Series.Sequence>
@@ -172,7 +260,7 @@ export const Witness: React.FC = () => {
         {/* 1906 · Жер */}
         <Series.Sequence name="1906 Land" durationInFrames={237}>
           <Sequence name="Year" durationInFrames={66}>
-            <YearCard year="1906" word="ЖЕР" />
+            <YearCard year="1906" from="1900" word="ЖЕР" />
           </Sequence>
           <Sequence name="Settlers" from={66} durationInFrames={105}>
             <ArchivePrint
@@ -188,6 +276,7 @@ export const Witness: React.FC = () => {
           </Sequence>
           <Sequence name="Poster 1906" from={171} durationInFrames={66}>
             <PosterCard src="journey/poster-1906.jpg" />
+            <LightLeak seed="journey/poster-1906.jpg" />
           </Sequence>
           <Sequence name="SFX — year">
             <Audio src={staticFile("sfx/boom.wav")} />
@@ -200,7 +289,7 @@ export const Witness: React.FC = () => {
         {/* 1913 · Сөз */}
         <Series.Sequence name="1913 Word" durationInFrames={347}>
           <Sequence name="Year" durationInFrames={66}>
-            <YearCard year="1913" word="СӨЗ" />
+            <YearCard year="1913" from="1906" word="СӨЗ" />
           </Sequence>
           <Sequence name="Qazaq newspaper" from={66} durationInFrames={76}>
             <ArchivePrint
@@ -237,6 +326,7 @@ export const Witness: React.FC = () => {
           </Sequence>
           <Sequence name="Poster 1913" from={273} durationInFrames={74}>
             <PosterCard src="journey/poster-1913.jpg" />
+            <LightLeak seed="journey/poster-1913.jpg" />
           </Sequence>
           <Sequence name="SFX — year">
             <Audio src={staticFile("sfx/boom.wav")} />
@@ -249,7 +339,7 @@ export const Witness: React.FC = () => {
         {/* 1916 · Көтеріліс */}
         <Series.Sequence name="1916 Uprising" durationInFrames={440}>
           <Sequence name="Year" durationInFrames={45}>
-            <YearCard year="1916" word="КӨТЕРІЛІС" />
+            <YearCard year="1916" from="1913" word="КӨТЕРІЛІС" />
           </Sequence>
           <Sequence name="Map" from={45} durationInFrames={80}>
             <ArchivePrint
@@ -257,6 +347,7 @@ export const Witness: React.FC = () => {
               ratio={0.634}
               caption="1916 жылғы Жетісу көтерілісінің картасы, 1917"
               rotate={-0.8}
+              overlay={<InkSpread />}
             />
             <Narration text="25 маусым. *Патша* *жарлығы.*" bottom={230} />
           </Sequence>
@@ -281,9 +372,11 @@ export const Witness: React.FC = () => {
           </Sequence>
           <Sequence name="Poster 1916 — Себеп" from={320} durationInFrames={60}>
             <PosterCard src="journey/poster-1916-sebep.jpg" />
+            <LightLeak seed="journey/poster-1916-sebep.jpg" />
           </Sequence>
           <Sequence name="Poster 1916 — Тізім" from={380} durationInFrames={60}>
             <PosterCard src="journey/poster-1916-tizim.jpg" />
+            <LightLeak seed="journey/poster-1916-tizim.jpg" />
           </Sequence>
           <Sequence name="SFX — poster sebep" from={320}>
             <Audio src={staticFile("sfx/whoosh.wav")} volume={0.6} />
@@ -291,11 +384,20 @@ export const Witness: React.FC = () => {
           <Sequence name="SFX — poster tizim" from={380}>
             <Audio src={staticFile("sfx/boom.wav")} />
           </Sequence>
+          <Sequence name="Heartbeat" from={45} durationInFrames={225}>
+            <Audio
+              src={staticFile("sfx/heartbeat.wav")}
+              volume={(f) => interpolate(f, [0, 200], [0.3, 1], clamp)}
+            />
+          </Sequence>
           <Sequence name="SFX — rise" from={270}>
             <Audio src={staticFile("sfx/boom.wav")} />
           </Sequence>
         </Series.Sequence>
 
+        <Series.Sequence name="Recap" durationInFrames={40}>
+          <Recap />
+        </Series.Sequence>
         <Series.Sequence name="Outro" durationInFrames={150}>
           <Outro />
         </Series.Sequence>
@@ -307,7 +409,12 @@ export const Witness: React.FC = () => {
       <Audio src={staticFile("sfx/drone.wav")} volume={0.3} loop />
       <WitnessVoiceover />
       <Audio src={staticFile("sfx/projector.wav")} volume={0.22} loop />
-      <Sequence name="SFX — outro" from={1354}>
+      {/* Тиканье часов под всем роликом — тема времени */}
+      <Audio src={staticFile("sfx/tick.wav")} volume={0.3} loop />
+      <Sequence name="SFX — riser to recap" from={1354}>
+        <Audio src={staticFile("sfx/riser.wav")} volume={0.5} />
+      </Sequence>
+      <Sequence name="SFX — outro" from={1439}>
         <Audio src={staticFile("sfx/chime.wav")} volume={0.5} />
       </Sequence>
     </AbsoluteFill>
