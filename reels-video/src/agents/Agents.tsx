@@ -14,7 +14,7 @@ const clamp = {
   extrapolateRight: "clamp",
 } as const;
 
-export const AGENTS_DURATION = 3048;
+export const AGENTS_DURATION = 2440;
 
 // --- Надписи внутри кадров (координаты — % от картинки) ---
 
@@ -279,7 +279,7 @@ const SCENES: Scene[] = [
   { p: 51, img: "31", zoom: Z(1.6, 1.8, 30, 25) },
 ];
 
-// «Агенттер» — казахская версия (идея: @kireev.voice), пиксель-арт, Медет
+// «Агенттер» — казахская версия ролика @kireev.voice, пиксель-арт, Медет
 export const Agents: React.FC = () => {
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
@@ -324,23 +324,7 @@ export const Agents: React.FC = () => {
         </Sequence>
       ))}
 
-      <Sequence name="Credit" from={AGENTS_DURATION - 75}>
-        <AbsoluteFill
-          style={{
-            alignItems: "center",
-            paddingTop: 150,
-            fontFamily: "Montserrat",
-            fontWeight: 700,
-            fontSize: 32,
-            color: "#fff",
-            textShadow: "2px 2px 0 #000",
-          }}
-        >
-          Идея: @kireev.voice
-        </AbsoluteFill>
-      </Sequence>
-
-      <Audio src={staticFile("agents/voice.mp3")} />
+      <Audio src={staticFile("agents/voice-125.mp3")} />
     </AbsoluteFill>
   );
 };
