@@ -2,6 +2,7 @@ import { Composition, Folder, Still } from "remotion";
 import { Montage } from "./montage/Montage";
 import { JourneyCover } from "./journey/Cover";
 import { Journey } from "./journey/Journey";
+import { Agents, AGENTS_DURATION } from "./agents/Agents";
 import { ReelsVideo } from "./ReelsVideo";
 import { Witness } from "./witness/Witness";
 import { CtaScene } from "./scenes/CtaScene";
@@ -154,6 +155,15 @@ export const RemotionRoot: React.FC = () => {
         height={1920}
         fps={30}
         durationInFrames={1589}
+      />
+      {/* «Агенттер» — казахская версия ролика @kireev.voice, пиксель-арт */}
+      <Composition
+        id="Agents"
+        component={Agents}
+        width={1080}
+        height={1920}
+        fps={30}
+        durationInFrames={AGENTS_DURATION}
       />
     </>
   );

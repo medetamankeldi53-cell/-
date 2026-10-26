@@ -28,7 +28,13 @@ export const Shot: React.FC<{
   shake?: boolean;
   glitch?: boolean;
   children?: React.ReactNode;
-}> = ({ src, zoom = { from: 1, to: 1.08, x: 50, y: 50 }, shake, glitch, children }) => {
+}> = ({
+  src,
+  zoom = { from: 1, to: 1.08, x: 50, y: 50 },
+  shake,
+  glitch,
+  children,
+}) => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
   const punch = interpolate(frame, [0, 6], [1.08, 1], {
@@ -60,7 +66,9 @@ export const Shot: React.FC<{
             objectFit: "cover",
             imageRendering: "pixelated",
             filter: gl ? "hue-rotate(160deg) saturate(2)" : undefined,
-            translate: gl ? `${(random(`gx${frame}`) - 0.5) * 40}px 0px` : undefined,
+            translate: gl
+              ? `${(random(`gx${frame}`) - 0.5) * 40}px 0px`
+              : undefined,
           }}
         />
         {children}
@@ -149,13 +157,12 @@ export const Subtitle: React.FC<{ text: string }> = ({ text }) => {
         }}
       >
         {text.split(" ").map((w, i) => {
-          const accent = w.length > 2 && w.startsWith("*") && w.endsWith("*");
+          // *слово* — акцент; знаки препинания после звёздочки остаются белыми
+          const m = /^\*(.+)\*([,.!?:…]*)$/.exec(w);
           return (
-            <span
-              key={i}
-              style={{ color: accent ? ORANGE : "#fff", marginRight: "0.25em" }}
-            >
-              {accent ? w.slice(1, -1) : w}
+            <span key={i}>
+              {m ? <span style={{ color: ORANGE }}>{m[1]}</span> : w}
+              {m ? m[2] : null}{" "}
             </span>
           );
         })}
