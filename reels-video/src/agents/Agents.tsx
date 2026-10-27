@@ -274,7 +274,7 @@ const SCENES: Scene[] = [
   },
   { p: 46, img: "29", zoom: Z(1, 1.12, 45, 55) },
   { p: 48, img: "20", zoom: Z(1.2, 2.2, 22, 47), glitch: true },
-  { p: 49, img: "30", zoom: Z(1, 1.2, 45, 45), overlay: <Rec /> },
+  { p: 49, img: "30", zoom: Z(1, 1.2, 45, 45), glitch: true, overlay: <Rec /> },
   { p: 50, img: "31", zoom: Z(1, 1.12, 40, 50) },
   { p: 51, img: "31", zoom: Z(1.6, 1.8, 30, 25) },
 ];
@@ -324,7 +324,7 @@ export const Agents: React.FC = () => {
         </Sequence>
       ))}
 
-      <Audio src={staticFile("agents/voice-125.mp3")} />
+      <Audio src={staticFile("agents/voice-125-robot.mp3")} />
     </AbsoluteFill>
   );
 };
