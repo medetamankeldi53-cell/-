@@ -1,4 +1,4 @@
-import { Audio } from "@remotion/media";
+import { Audio, Video } from "@remotion/media";
 import {
   AbsoluteFill,
   Easing,
@@ -20,19 +20,28 @@ const clamp = {
 
 export type Zoom = { from: number; to: number; x: number; y: number };
 
-// Кадр-картинка: удар-наезд на старте, медленный зум к точке (x, y в %),
+// Анимированный клип вместо картинки: с какого кадра клипа начать и с какой скоростью
+export type ClipPlay = {
+  src: string;
+  trimBefore: number;
+  playbackRate: number;
+};
+
+// Кадр (картинка или анимированный клип): удар-наезд на старте, медленный зум к точке (x, y в %),
 // белая вспышка на склейке, тряска по желанию, 8-битный «блип».
 export const Shot: React.FC<{
   src: string;
   zoom?: Zoom;
   shake?: boolean;
   glitch?: boolean;
+  clip?: ClipPlay;
   children?: React.ReactNode;
 }> = ({
   src,
   zoom = { from: 1, to: 1.08, x: 50, y: 50 },
   shake,
   glitch,
+  clip,
   children,
 }) => {
   const frame = useCurrentFrame();
@@ -58,19 +67,37 @@ export const Shot: React.FC<{
           translate: `${sx}px ${sy}px`,
         }}
       >
-        <Img
-          src={staticFile(src)}
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            imageRendering: "pixelated",
-            filter: gl ? "hue-rotate(160deg) saturate(2)" : undefined,
-            translate: gl
-              ? `${(random(`gx${frame}`) - 0.5) * 40}px 0px`
-              : undefined,
-          }}
-        />
+        {clip ? (
+          <Video
+            src={staticFile(clip.src)}
+            trimBefore={clip.trimBefore}
+            playbackRate={clip.playbackRate}
+            muted
+            objectFit="cover"
+            style={{
+              width: "100%",
+              height: "100%",
+              filter: gl ? "hue-rotate(160deg) saturate(2)" : undefined,
+              translate: gl
+                ? `${(random(`gx${frame}`) - 0.5) * 40}px 0px`
+                : undefined,
+            }}
+          />
+        ) : (
+          <Img
+            src={staticFile(src)}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              imageRendering: "pixelated",
+              filter: gl ? "hue-rotate(160deg) saturate(2)" : undefined,
+              translate: gl
+                ? `${(random(`gx${frame}`) - 0.5) * 40}px 0px`
+                : undefined,
+            }}
+          />
+        )}
         {children}
       </AbsoluteFill>
       <AbsoluteFill

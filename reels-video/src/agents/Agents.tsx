@@ -6,7 +6,7 @@ import {
   staticFile,
   useCurrentFrame,
 } from "remotion";
-import { ORANGE, Shot, Sticker, Subtitle, Zoom } from "./fx";
+import { ClipPlay, ORANGE, Shot, Sticker, Subtitle, Zoom } from "./fx";
 import { SUBS } from "./subs";
 
 const clamp = {
@@ -58,19 +58,19 @@ const Plaque: React.FC = () => (
   <div
     style={{
       position: "absolute",
-      left: "24.7%",
-      top: "65.9%",
-      width: "18.3%",
-      height: "3.4%",
+      left: "33.5%",
+      top: "67.4%",
+      width: "21.5%",
+      height: "4.4%",
       display: "flex",
       flexDirection: "column",
       justifyContent: "center",
       alignItems: "center",
       fontFamily: "'Cormorant Garamond', serif",
       fontWeight: 700,
-      fontSize: 19,
+      fontSize: 24,
       lineHeight: 1.05,
-      color: "#3b2508",
+      color: "#2a1704",
       textAlign: "center",
     }}
   >
@@ -102,29 +102,6 @@ const TwoDaysAgo: React.FC = () => {
       }}
     >
       2 КҮН БҰРЫН
-    </div>
-  );
-};
-
-// 25: письмо — Медет пытается печатать сам
-const Typing: React.FC = () => {
-  const frame = useCurrentFrame();
-  const text = "Сәлем, Асх";
-  const n = Math.floor(interpolate(frame, [10, 50], [0, text.length], clamp));
-  return (
-    <div
-      style={{
-        position: "absolute",
-        left: "31%",
-        top: "47%",
-        fontFamily: "'JetBrains Mono', monospace",
-        fontWeight: 700,
-        fontSize: 26,
-        color: "#1a2a55",
-      }}
-    >
-      {text.slice(0, n)}
-      <span style={{ opacity: frame % 16 < 8 ? 1 : 0 }}>|</span>
     </div>
   );
 };
@@ -258,8 +235,8 @@ const SCENES: Scene[] = [
   { p: 40, img: "22", zoom: Z(1.1, 1.5, 73, 70) },
   { p: 41, img: "27", zoom: Z(1.05, 1.15, 50, 40) },
   { p: 42, img: "26", zoom: Z(1, 1.06, 50, 30), overlay: <TwoDaysAgo /> },
-  { p: 43, img: "25", zoom: Z(1.3, 1.6, 40, 48), overlay: <Typing /> },
-  { p: 44, img: "25", zoom: Z(1.2, 1.5, 65, 63) },
+  { p: 43, img: "25", zoom: Z(1.05, 1.2, 40, 48) },
+  { p: 44, img: "25", zoom: Z(1.2, 1.4, 65, 63) },
   {
     p: 45,
     img: "28",
@@ -279,16 +256,85 @@ const SCENES: Scene[] = [
   { p: 51, img: "31", zoom: Z(1.6, 1.8, 30, 25) },
 ];
 
+// Границы сцен: каждая начинается чуть раньше своей фразы
+const SPANS = SCENES.map((s, i) => {
+  const start = Math.max(0, SUBS[s.p][0] - 2);
+  const end =
+    i + 1 < SCENES.length
+      ? Math.max(0, SUBS[SCENES[i + 1].p][0] - 2)
+      : AGENTS_DURATION;
+  return { start, end };
+});
+
+// Анимированные клипы (image-to-video): картинка -> [файл, длина клипа в кадрах].
+// Номера файлов перепутаны при генерации, поэтому сопоставлены по содержимому:
+// клип «22» — два агента на кресле (картинка 24), «27» — письмо (25),
+// «25» — поднятые руки (27; после 5,3 с в нём другая сцена). Для 22 (полицейский)
+// клипа нет, 26 («2 күн бұрын») остаётся картинкой — надпись привязана к рамке.
+const CLIPS: Record<string, [string, number]> = {
+  "01": ["01", 120],
+  "02": ["02", 120],
+  "03": ["03", 120],
+  "04": ["04", 120],
+  "05": ["05", 120],
+  "06": ["06", 120],
+  "07": ["07", 120],
+  "08": ["08", 120],
+  "09": ["09", 120],
+  "10": ["10", 120],
+  "11": ["11", 120],
+  "12": ["12", 120],
+  "13": ["13", 180],
+  "14": ["14", 180],
+  "15": ["15", 120],
+  "16": ["16", 120],
+  "17": ["17", 120],
+  "18": ["18", 120],
+  "19": ["19", 180],
+  "20": ["20", 240],
+  "21": ["21", 240],
+  "23": ["23", 120],
+  "24": ["22", 120],
+  "25": ["27", 120],
+  "27": ["25", 160],
+  "28": ["28", 120],
+  "29": ["29", 120],
+  "30": ["30", 120],
+  "31": ["31", 120],
+};
+
+// Повторная сцена с той же картинкой продолжает клип с места, где он остановился;
+// если клипа не хватает на сцену, он замедляется (но не медленнее 0,5×).
+const planClips = (
+  spans: { img: string; dur: number }[],
+): (ClipPlay | undefined)[] => {
+  const used: Record<string, number> = {};
+  return spans.map(({ img, dur }) => {
+    const c = CLIPS[img];
+    if (!c) return undefined;
+    const [file, len] = c;
+    let from = used[img] ?? 0;
+    if (len - from < dur) from = Math.max(0, len - dur);
+    const rate = Math.max(0.5, Math.min(1, (len - from) / dur));
+    used[img] = from + Math.ceil(dur * rate);
+    return {
+      src: `agents/clips/${file}.mp4`,
+      trimBefore: from,
+      playbackRate: rate,
+    };
+  });
+};
+
+const PLAN = planClips(
+  SCENES.map((s, i) => ({ img: s.img, dur: SPANS[i].end - SPANS[i].start })),
+);
+
 // «Агенттер» — казахская версия ролика @kireev.voice, пиксель-арт, Медет
 export const Agents: React.FC = () => {
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
       {SCENES.map((s, i) => {
-        const start = Math.max(0, SUBS[s.p][0] - 2);
-        const end =
-          i + 1 < SCENES.length
-            ? Math.max(0, SUBS[SCENES[i + 1].p][0] - 2)
-            : AGENTS_DURATION;
+        const { start, end } = SPANS[i];
         return (
           <Sequence
             key={i}
@@ -301,6 +347,7 @@ export const Agents: React.FC = () => {
               zoom={s.zoom}
               shake={s.shake}
               glitch={s.glitch}
+              clip={PLAN[i]}
             >
               {s.overlay}
             </Shot>
