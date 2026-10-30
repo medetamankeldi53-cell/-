@@ -4,6 +4,7 @@ import { JourneyCover } from "./journey/Cover";
 import { Journey } from "./journey/Journey";
 import { Agents, AGENTS_DURATION } from "./agents/Agents";
 import { FLAT_DURATION, FlatDemo } from "./flat/FlatDemo";
+import { Toi, TOI_DURATION } from "./toi/Toi";
 import { ReelsVideo } from "./ReelsVideo";
 import { Witness } from "./witness/Witness";
 import { CtaScene } from "./scenes/CtaScene";
@@ -174,6 +175,15 @@ export const RemotionRoot: React.FC = () => {
         height={1920}
         fps={30}
         durationInFrames={FLAT_DURATION}
+      />
+      {/* «Агенттер той жасайды» — 2D flat, полный ролик */}
+      <Composition
+        id="Toi"
+        component={Toi}
+        width={1080}
+        height={1920}
+        fps={30}
+        durationInFrames={TOI_DURATION}
       />
     </>
   );

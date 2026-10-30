@@ -37,10 +37,17 @@ export type MedetPose = {
 };
 
 // Медет: вид спереди, сидит за столом (видна верхняя часть тела)
-export const Medet: React.FC<{ frame: number; pose: MedetPose }> = ({
-  frame,
-  pose,
-}) => {
+// Внешность: по умолчанию Медет; для младшего брата — другая рубашка и без бороды
+export type Look = { shirt?: string; shirtShade?: string; beard?: boolean };
+
+export const Medet: React.FC<{
+  frame: number;
+  pose: MedetPose;
+  look?: Look;
+}> = ({ frame, pose, look = {} }) => {
+  const shirt = look.shirt ?? C.shirt;
+  const shirtShade = look.shirtShade ?? C.shirtShade;
+  const beard = look.beard ?? true;
   const { mouth, surprise, typing, shrug, wave, lookX } = pose;
   const b = blink(frame, 1);
   const breathe = Math.sin(frame / 18) * 3;
@@ -67,23 +74,23 @@ export const Medet: React.FC<{ frame: number; pose: MedetPose }> = ({
       {/* торс */}
       <path
         d={`M -170 ${-60 - sh} Q -175 -95 -110 -105 L 110 -105 Q 175 -95 170 ${-60 - sh} L 185 260 L -185 260 Z`}
-        fill={C.shirt}
+        fill={shirt}
       />
       {/* планка-воротник стойка */}
-      <path d="M -52 -108 L 52 -108 L 46 -78 L -46 -78 Z" fill={C.shirtShade} />
+      <path d="M -52 -108 L 52 -108 L 46 -78 L -46 -78 Z" fill={shirtShade} />
       <path
         d="M 0 -78 L 28 -78 L 28 60 L 0 60 Z"
-        fill={C.shirtShade}
+        fill={shirtShade}
         opacity={0.55}
       />
-      <circle cx={14} cy={-20} r={6} fill={C.shirtShade} />
-      <circle cx={14} cy={30} r={6} fill={C.shirtShade} />
+      <circle cx={14} cy={-20} r={6} fill={shirtShade} />
+      <circle cx={14} cy={30} r={6} fill={shirtShade} />
 
       {/* левая рука (зрителю справа) — печатает или пожимает плечами */}
       <g>
         <path
           d={`M 150 ${-60 - sh} Q ${215 + shrug * 30} ${40 - sh * 2} ${150 + shrug * 70} ${170 - tapR - shrug * 150}`}
-          stroke={C.shirt}
+          stroke={shirt}
           strokeWidth={70}
           strokeLinecap="round"
           fill="none"
@@ -101,7 +108,7 @@ export const Medet: React.FC<{ frame: number; pose: MedetPose }> = ({
       <g transform={`rotate(${waveAng} -150 ${-60 - sh})`}>
         <path
           d={`M -150 ${-60 - sh} Q ${-215 - shrug * 30} ${40 - sh * 2} ${-150 - shrug * 70} ${170 - tapL - shrug * 150}`}
-          stroke={C.shirt}
+          stroke={shirt}
           strokeWidth={70}
           strokeLinecap="round"
           fill="none"
@@ -169,14 +176,18 @@ export const Medet: React.FC<{ frame: number; pose: MedetPose }> = ({
           strokeLinecap="round"
         />
         {/* борода и усы */}
-        <path
-          d="M -78 62 Q -70 128 0 136 Q 70 128 78 62 Q 50 98 0 100 Q -50 98 -78 62 Z"
-          fill={C.hair}
-        />
-        <path
-          d="M -44 62 Q 0 46 44 62 Q 22 70 0 66 Q -22 70 -44 62 Z"
-          fill={C.hair}
-        />
+        {beard ? (
+          <>
+            <path
+              d="M -78 62 Q -70 128 0 136 Q 70 128 78 62 Q 50 98 0 100 Q -50 98 -78 62 Z"
+              fill={C.hair}
+            />
+            <path
+              d="M -44 62 Q 0 46 44 62 Q 22 70 0 66 Q -22 70 -44 62 Z"
+              fill={C.hair}
+            />
+          </>
+        ) : null}
         {/* рот */}
         <ellipse
           cx={0}
