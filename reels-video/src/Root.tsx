@@ -3,6 +3,7 @@ import { Montage } from "./montage/Montage";
 import { JourneyCover } from "./journey/Cover";
 import { Journey } from "./journey/Journey";
 import { Agents, AGENTS_DURATION } from "./agents/Agents";
+import { FLAT_DURATION, FlatDemo } from "./flat/FlatDemo";
 import { ReelsVideo } from "./ReelsVideo";
 import { Witness } from "./witness/Witness";
 import { CtaScene } from "./scenes/CtaScene";
@@ -164,6 +165,15 @@ export const RemotionRoot: React.FC = () => {
         height={1920}
         fps={30}
         durationInFrames={AGENTS_DURATION}
+      />
+      {/* 2D flat демо: персонажи нарисованы кодом (SVG) */}
+      <Composition
+        id="FlatDemo"
+        component={FlatDemo}
+        width={1080}
+        height={1920}
+        fps={30}
+        durationInFrames={FLAT_DURATION}
       />
     </>
   );
