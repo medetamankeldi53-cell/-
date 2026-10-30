@@ -402,11 +402,11 @@ export const SceneChat: React.FC = () => {
       <Tag
         frame={f}
         at={30}
-        x={330}
-        y={1610}
+        x={540}
+        y={140}
         size={70}
         color={GOLD}
-        rotate={-6}
+        rotate={-4}
       >
         «МӘШАЛЛА» ×{count}
       </Tag>
@@ -1084,7 +1084,8 @@ export const SceneMoral: React.FC = () => {
               textAlign: "center",
               fontFamily: "Montserrat",
               fontWeight: 900,
-              fontSize: 120,
+              fontSize: 100,
+              whiteSpace: "nowrap",
               color: "#fff",
               opacity: s,
               scale: String(interpolate(s, [0, 1], [2.4, 1])),
