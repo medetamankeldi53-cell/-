@@ -399,15 +399,7 @@ export const SceneChat: React.FC = () => {
           <Bot frame={f} size={150} seed={4} hat="headset" />
         </At>
       </Stage>
-      <Tag
-        frame={f}
-        at={30}
-        x={540}
-        y={140}
-        size={70}
-        color={GOLD}
-        rotate={-4}
-      >
+      <Tag frame={f} at={30} x={540} y={140} size={70} color={GOLD} rotate={-4}>
         «МӘШАЛЛА» ×{count}
       </Tag>
     </AbsoluteFill>

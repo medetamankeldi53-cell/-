@@ -5,6 +5,9 @@ import { Journey } from "./journey/Journey";
 import { Agents, AGENTS_DURATION } from "./agents/Agents";
 import { FLAT_DURATION, FlatDemo } from "./flat/FlatDemo";
 import { Toi, TOI_DURATION } from "./toi/Toi";
+import { calculateLessonMetadata, LessonVideo } from "./lesson/Lesson";
+import prompt101 from "./lesson/lessons/prompt-101.json";
+import { Lesson as LessonData } from "./lesson/types";
 import { ReelsVideo } from "./ReelsVideo";
 import { Witness } from "./witness/Witness";
 import { CtaScene } from "./scenes/CtaScene";
@@ -185,6 +188,19 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         durationInFrames={TOI_DURATION}
       />
+      {/* Видео-уроки: один JSON = один урок; длительность считается по озвучке */}
+      <Folder name="Lessons">
+        <Composition
+          id="Lesson-prompt-101"
+          component={LessonVideo}
+          width={1080}
+          height={1920}
+          fps={30}
+          durationInFrames={300}
+          defaultProps={{ lesson: prompt101 as LessonData }}
+          calculateMetadata={calculateLessonMetadata}
+        />
+      </Folder>
     </>
   );
 };
