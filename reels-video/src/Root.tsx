@@ -7,6 +7,7 @@ import { FLAT_DURATION, FlatDemo } from "./flat/FlatDemo";
 import { Toi, TOI_DURATION } from "./toi/Toi";
 import { calculateLessonMetadata, LessonVideo } from "./lesson/Lesson";
 import prompt101 from "./lesson/lessons/prompt-101.json";
+import videoPrompt from "./lesson/lessons/video-prompt.json";
 import { Lesson as LessonData } from "./lesson/types";
 import { ReelsVideo } from "./ReelsVideo";
 import { Witness } from "./witness/Witness";
@@ -198,6 +199,16 @@ export const RemotionRoot: React.FC = () => {
           fps={30}
           durationInFrames={300}
           defaultProps={{ lesson: prompt101 as LessonData }}
+          calculateMetadata={calculateLessonMetadata}
+        />
+        <Composition
+          id="Lesson-video-prompt"
+          component={LessonVideo}
+          width={1080}
+          height={1920}
+          fps={30}
+          durationInFrames={300}
+          defaultProps={{ lesson: videoPrompt as LessonData }}
           calculateMetadata={calculateLessonMetadata}
         />
       </Folder>
