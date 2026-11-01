@@ -22,7 +22,18 @@ export type Slide =
     }
   | { type: "summary"; heading: string; items: string[]; next?: string };
 
+// Эмоция учителя в пиксельной теме (портрет в диалоговом окне)
+export type Emotion =
+  | "hello"
+  | "explain"
+  | "happy"
+  | "surprised"
+  | "shrug"
+  | "sad"
+  | "shout";
+
 export type LessonSlide = Slide & {
+  emotion?: Emotion; // по умолчанию — по типу слайда
   narration: string; // текст диктора (по нему генерируется озвучка)
   durationSec?: number; // длительность озвучки + пауза
   mouth?: number[]; // громкость голоса по кадрам (0..1) — для рта учителя
@@ -32,6 +43,7 @@ export type Lesson = {
   id: string;
   title: string;
   series?: string; // например «AI САБАҚТАРЫ»
+  theme?: "flat" | "pixel"; // flat — 2D-учитель; pixel — RPG-диалог с пиксельным Медетом
   fps?: number;
   slides: LessonSlide[];
 };

@@ -1,5 +1,6 @@
 import { Easing, interpolate, useCurrentFrame, useVideoConfig } from "remotion";
 import { C, clamp } from "../flat/characters";
+import { usePixel } from "./theme";
 import { Slide } from "./types";
 
 export const T = {
@@ -28,6 +29,7 @@ const stagger = (i: number, n: number, dur: number) =>
 
 const Heading: React.FC<{ text: string }> = ({ text }) => {
   const frame = useCurrentFrame();
+  const px = usePixel();
   const p = appear(frame, 0);
   return (
     <div
@@ -38,6 +40,7 @@ const Heading: React.FC<{ text: string }> = ({ text }) => {
         lineHeight: 1.1,
         color: T.text,
         marginBottom: 50,
+        textShadow: px ? "6px 6px 0 #000" : undefined,
         opacity: p,
         translate: `0px ${(1 - p) * 30}px`,
       }}
@@ -54,13 +57,17 @@ const Card: React.FC<{
   style?: React.CSSProperties;
 }> = ({ at, children, border = "transparent", style }) => {
   const frame = useCurrentFrame();
+  const px = usePixel();
   const p = appear(frame, at);
   return (
     <div
       style={{
-        backgroundColor: T.card,
-        border: `5px solid ${border}`,
-        borderRadius: 34,
+        backgroundColor: px ? "#0d1030" : T.card,
+        border: px
+          ? `7px solid ${border === "transparent" ? "#fff" : border}`
+          : `5px solid ${border}`,
+        borderRadius: px ? 0 : 34,
+        boxShadow: px ? "10px 10px 0 #000" : undefined,
         padding: "34px 40px",
         opacity: p,
         scale: String(interpolate(p, [0, 1], [0.92, 1])),
@@ -74,6 +81,7 @@ const Card: React.FC<{
 
 export const SlideView: React.FC<{ slide: Slide }> = ({ slide }) => {
   const frame = useCurrentFrame();
+  const px = usePixel();
   const { durationInFrames: dur } = useVideoConfig();
 
   if (slide.type === "title") {
@@ -135,7 +143,7 @@ export const SlideView: React.FC<{ slide: Slide }> = ({ slide }) => {
                 style={{
                   flex: "0 0 70px",
                   height: 70,
-                  borderRadius: 35,
+                  borderRadius: px ? 0 : 35,
                   backgroundColor: slide.type === "summary" ? T.good : T.gold,
                   color: T.bg,
                   fontFamily: font,
@@ -331,7 +339,7 @@ export const SlideView: React.FC<{ slide: Slide }> = ({ slide }) => {
                 style={{
                   flex: "0 0 84px",
                   height: 84,
-                  borderRadius: 42,
+                  borderRadius: px ? 0 : 42,
                   border: `6px solid ${T.gold}`,
                   backgroundColor: on ? T.gold : "transparent",
                   color: on ? T.bg : T.gold,
