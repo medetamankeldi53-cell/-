@@ -5,6 +5,7 @@ import { Journey } from "./journey/Journey";
 import { Agents, AGENTS_DURATION } from "./agents/Agents";
 import { FLAT_DURATION, FlatDemo } from "./flat/FlatDemo";
 import { Toi, TOI_DURATION } from "./toi/Toi";
+import { Lift, LIFT_DURATION } from "./lift/Lift";
 import { calculateLessonMetadata, LessonVideo } from "./lesson/Lesson";
 import prompt101 from "./lesson/lessons/prompt-101.json";
 import videoPrompt from "./lesson/lessons/video-prompt.json";
@@ -212,6 +213,15 @@ export const RemotionRoot: React.FC = () => {
           calculateMetadata={calculateLessonMetadata}
         />
       </Folder>
+      {/* «Лифт» — вирусный перемонтаж ролика про отражение */}
+      <Composition
+        id="Lift"
+        component={Lift}
+        width={1080}
+        height={1920}
+        fps={30}
+        durationInFrames={LIFT_DURATION}
+      />
     </>
   );
 };
