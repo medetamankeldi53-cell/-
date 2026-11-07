@@ -18,14 +18,14 @@ const FPS = 30;
 const RATE = 1.12;
 const SRC = "lift/src.mp4";
 
-// Куда наезжает камера (доли кадра) и насколько
+// Кадр без наездов (пользователь попросил не зумировать); метки оставлены для раскадровки
 type Cam = { x: number; y: number; z: number };
 const WIDE: Cam = { x: 0.5, y: 0.45, z: 1.0 };
-const MEDET: Cam = { x: 0.45, y: 0.3, z: 1.8 };
-const MIRROR: Cam = { x: 0.78, y: 0.4, z: 1.9 };
-const MIRROR_LOW: Cam = { x: 0.77, y: 0.72, z: 1.8 };
-const GUEST: Cam = { x: 0.13, y: 0.42, z: 1.8 };
-const TWIN: Cam = { x: 0.2, y: 0.35, z: 1.7 };
+const MEDET: Cam = WIDE;
+const MIRROR: Cam = WIDE;
+const MIRROR_LOW: Cam = WIDE;
+const GUEST: Cam = WIDE;
+const TWIN: Cam = WIDE;
 
 // [начало, конец (секунды исходника), камера]
 const SHOTS: [number, number, Cam][] = [
@@ -68,19 +68,11 @@ const Shot: React.FC<{
   muted?: boolean;
   rate?: number;
 }> = ({ from, cam, muted, rate = RATE }) => {
-  const frame = useCurrentFrame();
-  const { durationInFrames } = useVideoConfig();
-  // удар-наезд на склейке + медленный дрейф
-  const punch = interpolate(frame, [0, 6], [1.06, 1], {
-    extrapolateRight: "clamp",
-    easing: Easing.out(Easing.cubic),
-  });
-  const drift = interpolate(frame, [0, durationInFrames], [1, 1.05]);
   return (
     <AbsoluteFill style={{ backgroundColor: "#000", overflow: "hidden" }}>
       <AbsoluteFill
         style={{
-          scale: String(cam.z * punch * drift),
+          scale: String(cam.z),
           transformOrigin: `${cam.x * 100}% ${cam.y * 100}%`,
         }}
       >
@@ -176,18 +168,12 @@ const Floor: React.FC = () => {
 };
 
 export const Lift: React.FC = () => {
-  const frame = useCurrentFrame();
   const endQ = at(40.0);
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
       {/* ХУК: Медет улыбается в телефон, а отражение сидит на полу */}
       <Sequence name="Hook" durationInFrames={HOOK}>
-        <AbsoluteFill
-          style={{
-            scale: String(interpolate(frame, [0, HOOK], [1.25, 1.55])),
-            transformOrigin: "66% 52%",
-          }}
-        >
+        <AbsoluteFill style={{}}>
           <Video
             src={staticFile(SRC)}
             trimBefore={Math.round(26.9 * FPS)}
