@@ -32,12 +32,14 @@ const BEATS = Array.from({ length: 52 }, (_, k) => 0.36 + k * 0.6355);
 // Рубрики: [начало, конец, заголовок, подпись]
 const CATS: [number, number, string, string][] = [
   [1.47, 6.97, "АТ ӘБЗЕЛДЕРІ", "жүген · ноқта · арқан"],
-  [6.97, 13.37, "МАЛ ДӘРІЛЕРІ", "ветеринариялық препараттар"],
+  [6.97, 13.37, "МАЛ ДӘРІЛЕРІ", "дәрі-дәрмек · витаминдер"],
   [13.37, 14.97, "ТЫМАҚ · БӨРІК", "ұлттық бас киім"],
   [14.97, 18.3, "ЕР-ТҰРМАН", "ер · тоқым · үзеңгі"],
   [18.3, 21.1, "ЕТІК", "салт атқа арналған"],
-  [21.1, 26.23, "ЖЕМ-ШӨП", "мал азығы · дән"],
+  [21.1, 26.23, "ЖЕМ-ШӨП", "құрама жем · дән"],
 ];
+
+const PHONES = ["+7 701 356 77 21", "+7 775 732 32 11"];
 
 const ease = Easing.bezier(0.16, 1, 0.3, 1);
 
@@ -318,7 +320,7 @@ const Outro: React.FC = () => {
     extrapolateRight: "clamp",
     easing: ease,
   });
-  const R = 330;
+  const R = 270;
   const C = 2 * Math.PI * (R + 18);
   return (
     <AbsoluteFill>
@@ -392,7 +394,7 @@ const Outro: React.FC = () => {
               lineHeight: 1.5,
             }}
           >
-            Әбзел · Дәрі · Жем-шөп
+            Қарқаралы қаласы
           </div>
         </Rise>
         <Rise delay={26} style={{ marginTop: 18 }}>
@@ -407,6 +409,41 @@ const Outro: React.FC = () => {
             @qambar_ata.qarqaraly
           </div>
         </Rise>
+        <div style={{ marginTop: 40, display: "flex", flexDirection: "column", gap: 18 }}>
+          {PHONES.map((ph, i) => (
+            <Rise key={ph} delay={30 + i * 4}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 18,
+                  padding: "14px 40px",
+                  border: `3px solid ${GOLD}`,
+                  borderRadius: 60,
+                  background: "rgba(245,185,66,0.12)",
+                }}
+              >
+                <svg width={44} height={44} viewBox="0 0 24 24">
+                  <path
+                    fill={GOLD}
+                    d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.6a1 1 0 0 1-.25 1z"
+                  />
+                </svg>
+                <span
+                  style={{
+                    fontFamily: "Montserrat",
+                    fontWeight: 900,
+                    fontSize: 58,
+                    color: "#fff",
+                    letterSpacing: 1,
+                  }}
+                >
+                  {ph}
+                </span>
+              </div>
+            </Rise>
+          ))}
+        </div>
       </AbsoluteFill>
     </AbsoluteFill>
   );
