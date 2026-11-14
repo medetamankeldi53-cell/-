@@ -16,7 +16,41 @@ import "../fonts";
 
 const FPS = 30;
 const SRC = "qambar/src.mp4";
-export const QAMBAR_DURATION = Math.floor(33.7 * FPS);
+export const QAMBAR_DURATION = 36 * FPS; // 33,7 с исходника + хвост на номера телефонов
+const MUSIC_END = 33.7;
+
+// Диктор (public/qambar/vo.mp3, Prince Nur): [начало в vo, конец в vo, куда ставим в ролике]
+// Фразы разрезаны по паузам silencedetect.
+const VO: [number, number, number][] = [
+  [0, 2.2, 0.2], // Атқа керектің бәрі — бір жерде!
+  [2.3, 6.55, 2.5], // Жүген, ноқта, арқан — таза былғарыдан…
+  [6.65, 9.75, 7.2], // Малға дәрі-дәрмек пен витаминдер…
+  [9.9, 12.42, 13.4], // Ұлттық тымақ пен бөрік, ер-тұрман,
+  [12.45, 14.2, 18.4], // салт атқа арналған етік.
+  [14.3, 17.4, 21.3], // Құрама жем мен дән — сапалы әрі таза.
+  [17.5, 20.05, 26.4], // Малың тоқ, атың жүйрік болсын!
+  [20.1, 23.33, 31.4], // Қамбар Ата — Қарқаралы қаласы. Хабарласыңыз!
+];
+// Громкость музыки: приглушаем под голосом, в конце — затухание
+const musicVolume = (frame: number) => {
+  const t = frame / FPS;
+  let duck = 1;
+  for (const [a, b, at] of VO) {
+    const s = at - 0.15;
+    const e = at + (b - a) + 0.15;
+    const d = Math.min(
+      interpolate(t, [s - 0.2, s], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) +
+        interpolate(t, [e, e + 0.3], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }),
+      1,
+    );
+    duck = Math.min(duck, 0.22 + 0.78 * d);
+  }
+  const fade = interpolate(t, [MUSIC_END - 1.2, MUSIC_END - 0.05], [1, 0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+  return duck * fade;
+};
 const GOLD = "#f5b942";
 const RED = "#c8242b";
 const f = (t: number) => Math.round(t * FPS);
@@ -305,7 +339,8 @@ const BeatFrame: React.FC = () => {
 // Финал: эмблема магазина — круг раскрывается, вокруг прорисовывается золотое кольцо
 const Outro: React.FC = () => {
   const frame = useCurrentFrame();
-  const dim = interpolate(frame, [0, 10], [0, 0.78], {
+  // к концу музыки исходник уходит в чёрное — номера остаются на чистом фоне
+  const dim = interpolate(frame, [0, 10, 62, 74], [0, 0.78, 0.78, 1], {
     extrapolateRight: "clamp",
   });
   const reveal = interpolate(frame, [2, 20], [0, 1], {
@@ -456,6 +491,8 @@ export const Qambar: React.FC = () => {
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
       <Video
         src={staticFile(SRC)}
+        trimAfter={f(MUSIC_END) - 1}
+        volume={musicVolume}
         objectFit="cover"
         style={{ width: "100%", height: "100%" }}
       />
@@ -497,6 +534,13 @@ export const Qambar: React.FC = () => {
       <Sequence name="Outro" from={outroAt}>
         <Outro />
       </Sequence>
+
+      {/* Диктор */}
+      {VO.map(([a, b, at]) => (
+        <Sequence key={a} name={`VO ${a}`} from={f(at)} durationInFrames={f(b) - f(a)}>
+          <Audio src={staticFile("qambar/vo.mp3")} trimBefore={f(a)} volume={1.0} />
+        </Sequence>
+      ))}
 
       {/* Акценты звука поверх музыки */}
       <Sequence from={f(CUTS[0]) - 6}>
