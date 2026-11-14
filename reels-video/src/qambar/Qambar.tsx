@@ -2,6 +2,7 @@ import { Audio, Video } from "@remotion/media";
 import {
   AbsoluteFill,
   Easing,
+  Img,
   interpolate,
   Sequence,
   staticFile,
@@ -39,45 +40,6 @@ const CATS: [number, number, string, string][] = [
 ];
 
 const ease = Easing.bezier(0.16, 1, 0.3, 1);
-
-// Подкова: SVG-контур, рисуется штрихом
-const Horseshoe: React.FC<{ size: number; draw: number; stroke?: number }> = ({
-  size,
-  draw,
-  stroke = 14,
-}) => {
-  const len = 420;
-  return (
-    <svg width={size} height={size} viewBox="0 0 160 160">
-      <path
-        d="M40 140 L40 80 A40 40 0 0 1 120 80 L120 140"
-        fill="none"
-        stroke={GOLD}
-        strokeWidth={stroke}
-        strokeLinecap="round"
-        strokeDasharray={len}
-        strokeDashoffset={len * (1 - draw)}
-      />
-      {[
-        [40, 100],
-        [46, 66],
-        [62, 46],
-        [98, 46],
-        [114, 66],
-        [120, 100],
-      ].map(([x, y], i) => (
-        <circle
-          key={i}
-          cx={x}
-          cy={y}
-          r={3.5}
-          fill="#1a1a1a"
-          opacity={draw > (i + 1) / 7 ? 1 : 0}
-        />
-      ))}
-    </svg>
-  );
-};
 
 // Текст, выезжающий из-под маски снизу
 const Rise: React.FC<{
@@ -258,7 +220,10 @@ const Badge: React.FC = () => {
         transform: `translateX(${(1 - p) * -40}px)`,
       }}
     >
-      <Horseshoe size={58} draw={p} stroke={16} />
+      <Img
+        src={staticFile("qambar/logo.png")}
+        style={{ width: 64, height: 64, borderRadius: "50%" }}
+      />
       <span
         style={{
           fontFamily: "Montserrat",
@@ -335,20 +300,26 @@ const BeatFrame: React.FC = () => {
   );
 };
 
-// Финал: логотип
+// Финал: эмблема магазина — круг раскрывается, вокруг прорисовывается золотое кольцо
 const Outro: React.FC = () => {
   const frame = useCurrentFrame();
-  const dim = interpolate(frame, [0, 10], [0, 0.72], {
+  const dim = interpolate(frame, [0, 10], [0, 0.78], {
     extrapolateRight: "clamp",
   });
-  const draw = interpolate(frame, [2, 26], [0, 1], {
-    extrapolateRight: "clamp",
-    easing: Easing.inOut(Easing.cubic),
-  });
-  const line = interpolate(frame, [18, 34], [0, 1], {
+  const reveal = interpolate(frame, [2, 20], [0, 1], {
     extrapolateRight: "clamp",
     easing: ease,
   });
+  const ring = interpolate(frame, [8, 34], [0, 1], {
+    extrapolateRight: "clamp",
+    easing: Easing.inOut(Easing.cubic),
+  });
+  const line = interpolate(frame, [22, 38], [0, 1], {
+    extrapolateRight: "clamp",
+    easing: ease,
+  });
+  const R = 330;
+  const C = 2 * Math.PI * (R + 18);
   return (
     <AbsoluteFill>
       <AbsoluteFill style={{ backgroundColor: `rgba(8,8,8,${dim})` }} />
@@ -360,32 +331,46 @@ const Outro: React.FC = () => {
           textAlign: "center",
         }}
       >
-        <Horseshoe size={260} draw={draw} stroke={13} />
-        <Rise delay={10}>
-          <div
+        <div style={{ position: "relative", width: R * 2, height: R * 2 }}>
+          <Img
+            src={staticFile("qambar/logo.png")}
             style={{
-              fontFamily: "Montserrat",
-              fontWeight: 900,
-              fontSize: 130,
-              color: "#fff",
-              letterSpacing: 4,
-              lineHeight: 1.1,
+              width: R * 2,
+              height: R * 2,
+              clipPath: `circle(${reveal * 50}% at 50% 50%)`,
+              boxShadow: "0 20px 80px rgba(0,0,0,0.6)",
+              borderRadius: "50%",
             }}
+          />
+          <svg
+            width={R * 2 + 60}
+            height={R * 2 + 60}
+            style={{ position: "absolute", left: -30, top: -30 }}
           >
-            ҚАМБАР АТА
-          </div>
-        </Rise>
-        <Rise delay={14}>
+            <circle
+              cx={R + 30}
+              cy={R + 30}
+              r={R + 18}
+              fill="none"
+              stroke={GOLD}
+              strokeWidth={6}
+              strokeDasharray={C}
+              strokeDashoffset={C * (1 - ring)}
+              transform={`rotate(-90 ${R + 30} ${R + 30})`}
+            />
+          </svg>
+        </div>
+        <Rise delay={16} style={{ marginTop: 60 }}>
           <div
             style={{
               fontFamily: "Montserrat",
               fontWeight: 800,
-              fontSize: 54,
+              fontSize: 50,
               color: GOLD,
-              letterSpacing: 18,
+              letterSpacing: 4,
             }}
           >
-            ДҮКЕНІ
+            АУЫЛ ШАРУАШЫЛЫҚ ДҮКЕНІ
           </div>
         </Rise>
         <div
@@ -394,7 +379,7 @@ const Outro: React.FC = () => {
             width: 560 * line,
             background: `linear-gradient(90deg, ${GOLD}, ${RED})`,
             borderRadius: 3,
-            margin: "34px 0",
+            margin: "28px 0",
           }}
         />
         <Rise delay={22}>
@@ -408,8 +393,18 @@ const Outro: React.FC = () => {
             }}
           >
             Әбзел · Дәрі · Жем-шөп
-            <br />
-            Бәрі бір жерде
+          </div>
+        </Rise>
+        <Rise delay={26} style={{ marginTop: 18 }}>
+          <div
+            style={{
+              fontFamily: "Montserrat",
+              fontWeight: 800,
+              fontSize: 46,
+              color: "#fff",
+            }}
+          >
+            @qambar_ata.qarqaraly
           </div>
         </Rise>
       </AbsoluteFill>
