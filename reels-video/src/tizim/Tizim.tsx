@@ -37,8 +37,7 @@ const LINES: [string, number, number, number, number][] = [
   ["A2m", 0, 1.03, 7.25, 1], // Жарлық шықты.
   ["A2m", 1.33, 2.4, 8.45, 1], // Мардікерге алады.
   ["A3m", 0, 1.6, 12.2, 1], // Бай (сыбырлап): Менің ұлымды жазба.
-  ["A4m", 0.18, 1.54, 15.7, 1], // Анасы: Барма, балам…
-  ["A4m", 2.19, 4.14, 17.6, 1], // …Сен кетсең, біз қайтеміз?
+  // A4 (Анасы: «Барма, балам…») — теперь в перегенерированном кадре shot04 (липсинк по аудио-референсу)
   ["A5m", 0.1, 0.68, 21.4, 1], // Жігіт: Апа,
   ["A5m", 0.93, 1.97, 22.15, 1], // …мен қайтып келемін.
   ["D1", 0, 3.79, 24.8, 1], // Диктор
@@ -189,6 +188,12 @@ export const Tizim: React.FC = () => {
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
       <Video src={staticFile("tizim/src.mp4")} muted />
+      {/* Кадр 4 перегенерирован с аудио-референсом: губы совпадают с репликой.
+          Звук клипа — shot04.wav (+5,9 дБ к уровню остальных реплик). */}
+      <Sequence name="Shot 4 (new)" from={f(14.875)} durationInFrames={f(19.875) - f(14.875)}>
+        <Video src={staticFile("tizim/shot04.mp4")} muted />
+        <Audio src={staticFile("tizim/shot04.wav")} />
+      </Sequence>
       <Audio
         src={staticFile("tizim/bed.wav")}
         volume={(fr) => underNarrator(fr / TIZIM_FPS)}
