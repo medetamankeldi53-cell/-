@@ -1,4 +1,4 @@
-import { Video } from "@remotion/media";
+import { Audio, Video } from "@remotion/media";
 import {
   AbsoluteFill,
   Easing,
@@ -28,6 +28,31 @@ const CAPTIONS: [number, number, string, string][] = [
   [29.5, 34.0, "Жігіттер аттанды", "Тізімге ілінгендер ауылдан кетті"],
   [54.4, 57.2, "Торғай, 1916", "Амангелді Иманов бастаған көтеріліс"],
 ];
+
+// Новые реплики: [файл, начало в файле, конец в файле, куда ставим (с), громкость]
+// Длинные фразы разрезаны по паузе, чтобы лечь в ритм оригинала.
+const LINES: [string, number, number, number, number][] = [
+  ["A1", 0.15, 1.22, 1.9, 1], // Ағай: Мына жігіт…
+  ["A1", 1.45, 2.7, 3.2, 1], // …газет оқыған жігіт қой!
+  ["A2", 0, 1.03, 7.25, 1], // Жарлық шықты.
+  ["A2", 1.33, 2.4, 8.45, 1], // Мардікерге алады.
+  ["A3", 0, 1.6, 12.2, 0.75], // Бай (сыбырлап): Менің ұлымды жазба.
+  ["A4", 0.18, 1.54, 15.7, 1], // Анасы: Барма, балам…
+  ["A4", 2.19, 4.14, 17.6, 1], // …Сен кетсең, біз қайтеміз?
+  ["A5", 0.1, 0.68, 21.4, 1], // Жігіт: Апа,
+  ["A5", 0.93, 1.97, 22.15, 1], // …мен қайтып келемін.
+  ["D1", 0, 3.79, 24.8, 1], // Диктор
+];
+
+// Фон без старой озвучки — public/tizim/bed.wav: исходный звук, где окна старой речи
+// (1,8–4,7 / 7,2–9,4 / 10,1–13,8 / 15,9–19,4 / 21,3–23,1 с) заменены степным фоном
+// из тихого 6-го кадра (26–29 с, по кругу с кроссфейдами). Собран ffmpeg + numpy.
+// Под диктором чуть приглушаем фон
+const underNarrator = (t: number) =>
+  interpolate(t, [24.6, 24.8, 28.6, 28.9], [1, 0.55, 0.55, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
 
 const ease = Easing.bezier(0.16, 1, 0.3, 1);
 
@@ -154,7 +179,25 @@ const SeriesCard: React.FC = () => {
 export const Tizim: React.FC = () => {
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
-      <Video src={staticFile("tizim/src.mp4")} />
+      <Video src={staticFile("tizim/src.mp4")} muted />
+      <Audio
+        src={staticFile("tizim/bed.wav")}
+        volume={(fr) => underNarrator(fr / TIZIM_FPS)}
+      />
+      {LINES.map(([file, a, b, at, vol]) => (
+        <Sequence
+          key={`${file}-${a}`}
+          name={`${file} @${at}`}
+          from={f(at)}
+          durationInFrames={f(b) - f(a)}
+        >
+          <Audio
+            src={staticFile(`tizim/${file}.mp3`)}
+            trimBefore={f(a)}
+            volume={vol}
+          />
+        </Sequence>
+      ))}
       {CAPTIONS.map(([a, b, title, sub]) => (
         <Sequence
           key={title}
