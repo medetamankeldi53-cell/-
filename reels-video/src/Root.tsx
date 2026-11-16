@@ -7,6 +7,7 @@ import { FLAT_DURATION, FlatDemo } from "./flat/FlatDemo";
 import { Toi, TOI_DURATION } from "./toi/Toi";
 import { Lift, LIFT_DURATION } from "./lift/Lift";
 import { Qambar, QAMBAR_DURATION } from "./qambar/Qambar";
+import { Tizim, TIZIM_DURATION, TIZIM_FPS } from "./tizim/Tizim";
 import { calculateLessonMetadata, LessonVideo } from "./lesson/Lesson";
 import prompt101 from "./lesson/lessons/prompt-101.json";
 import videoPrompt from "./lesson/lessons/video-prompt.json";
@@ -231,6 +232,15 @@ export const RemotionRoot: React.FC = () => {
         height={1920}
         fps={30}
         durationInFrames={QAMBAR_DURATION}
+      />
+      {/* «Уақыт куәлары: 1916. Тізім» — 16:9, поясняющие надписи */}
+      <Composition
+        id="Tizim"
+        component={Tizim}
+        width={1280}
+        height={720}
+        fps={TIZIM_FPS}
+        durationInFrames={TIZIM_DURATION}
       />
     </>
   );
