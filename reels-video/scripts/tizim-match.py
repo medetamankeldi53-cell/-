@@ -20,12 +20,25 @@ DIR = "public/tizim/"
 
 # файл: (окно старой речи в исходнике, доля реверба, доп. затухание ВЧ для общего плана)
 LINES = {
-    "A1": ((1.8, 4.7), 0.10, 0.0),  # средний план
-    "A2": ((7.2, 9.4), 0.20, 1.0),  # общий план — дальше и «воздушнее»
-    "A3": ((10.1, 13.8), 0.06, 0.0),  # крупный, шёпот
-    "A4": ((15.9, 19.4), 0.08, 0.0),  # крупный
-    "A5": ((21.3, 23.1), 0.10, 0.0),  # средний
+    # файл: (окно эталонной речи в исходнике, доля реверба, затемнение ВЧ, поправка громкости дБ)
+    "A1": ((1.8, 4.7), 0.10, 0.0, 0),  # средний план
+    "A2": ((7.2, 9.4), 0.20, 1.0, 0),  # общий план — дальше и «воздушнее»
+    "A3": ((10.1, 13.8), 0.06, 0.0, 0),  # крупный, шёпот
+    "A4": ((15.9, 19.4), 0.08, 0.0, 0),  # крупный
+    "A5": ((21.3, 23.1), 0.10, 0.0, 0),  # средний
+    # Б: у B1 в исходнике речи нет — эталон голос Ағай (A1), он за кадром
+    "B1": ((1.8, 4.7), 0.22, 1.0, -3),
+    "B2": ((35.5, 37.0), 0.08, 0.0, 0),  # анасы у двери, крупный
+    "B3": ((41.2, 44.25), 0.22, 1.0, -2),  # за кадром, общий план степи
+    "B5": ((51.9, 53.4), 0.08, 0.0, 0),  # анасы обнимает мальчика
+    "B6": ((54.5, 59.0), 0.12, 0.0, 0),  # финальный кадр
 }
+
+# Окна старой озвучки, которые заменяются фоном в bed.wav (B4 — голос жиена — остаётся!)
+OLD_SPEECH = [
+    (1.8, 4.7), (7.2, 9.4), (10.1, 13.8), (15.9, 19.4), (21.3, 23.1),
+    (35.5, 37.0), (41.2, 44.25), (51.9, 53.4), (54.5, 55.3), (56.1, 56.9), (58.2, 59.17),
+]
 
 
 def load(path: str) -> np.ndarray:
@@ -78,7 +91,7 @@ def rms(x: np.ndarray) -> float:
 
 
 src = load(DIR + "src.mp4")
-for i, (name, ((a, b), wet, dark)) in enumerate(LINES.items()):
+for i, (name, ((a, b), wet, dark, lvl)) in enumerate(LINES.items()):
     old = src[int(a * SR) : int(b * SR)]
     new = load(DIR + f"{name}.mp3")
 
@@ -105,7 +118,7 @@ for i, (name, ((a, b), wet, dark)) in enumerate(LINES.items()):
     dry = np.concatenate([eq, np.zeros(len(ir))])
     out = dry * (1 - wet) + rev * wet * 0.6
 
-    out *= rms(old) / rms(out)
+    out *= rms(old) / rms(out) * 10 ** (lvl / 20)
     peak = np.abs(out).max()
     if peak > 0.95:
         out *= 0.95 / peak
@@ -118,3 +131,38 @@ for i, (name, ((a, b), wet, dark)) in enumerate(LINES.items()):
     )
     print(name, f"gain {20*np.log10(rms(old)/rms(eq)):+.1f} dB",
           "eq@200/1k/3k/6k:", [round(float(np.interp(x, freqs, g_db)), 1) for x in (200, 1000, 3000, 6000)])
+
+
+# --- Фон: исходник, где старая речь заменена степным фоном (26–29 с, по кругу) ---
+def load_st(path: str) -> np.ndarray:
+    raw = subprocess.run(
+        ["ffmpeg", "-v", "error", "-i", path, "-ac", "2", "-ar", str(SR), "-f", "f32le", "-"],
+        capture_output=True, check=True,
+    ).stdout
+    return np.frombuffer(raw, dtype=np.float32).reshape(-1, 2).astype(np.float64)
+
+
+o = load_st(DIR + "src.mp4")
+n = len(o)
+t = np.arange(n) / SR
+amb = o[int(26 * SR) : int(29 * SR)]
+xf = int(0.3 * SR)
+w = np.linspace(0, 1, xf)[:, None]
+loop = np.zeros((n + len(amb), 2))
+pos = 0
+while pos < n:
+    c = amb.copy()
+    c[:xf] *= w
+    c[-xf:] *= w[::-1]
+    loop[pos : pos + len(amb)] += c
+    pos += len(amb) - xf
+loop = loop[:n]
+keep = np.ones(n)
+for s_, e_ in OLD_SPEECH:
+    keep = np.minimum(keep, np.clip(np.maximum((s_ - t) / 0.12, (t - e_) / 0.12), 0, 1))
+bed = o * keep[:, None] + loop * (1 - keep[:, None]) * 0.9
+subprocess.run(
+    ["ffmpeg", "-v", "error", "-y", "-f", "f32le", "-ar", str(SR), "-ac", "2", "-i", "-", DIR + "bed.wav"],
+    input=bed.astype(np.float32).tobytes(), check=True,
+)
+print("bed.wav ok")
