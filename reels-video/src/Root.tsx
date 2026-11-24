@@ -8,6 +8,7 @@ import { Toi, TOI_DURATION } from "./toi/Toi";
 import { Lift, LIFT_DURATION } from "./lift/Lift";
 import { Qambar, QAMBAR_DURATION } from "./qambar/Qambar";
 import { Tizim, TIZIM_DURATION, TIZIM_FPS } from "./tizim/Tizim";
+import { Iz, IZ_DURATION, IZ_FPS } from "./iz/Iz";
 import { calculateLessonMetadata, LessonVideo } from "./lesson/Lesson";
 import prompt101 from "./lesson/lessons/prompt-101.json";
 import videoPrompt from "./lesson/lessons/video-prompt.json";
@@ -241,6 +242,15 @@ export const RemotionRoot: React.FC = () => {
         height={720}
         fps={TIZIM_FPS}
         durationInFrames={TIZIM_DURATION}
+      />
+      {/* «Із» — хук с оборванной фразой + субтитры */}
+      <Composition
+        id="Iz"
+        component={Iz}
+        width={1280}
+        height={720}
+        fps={IZ_FPS}
+        durationInFrames={IZ_DURATION}
       />
     </>
   );
