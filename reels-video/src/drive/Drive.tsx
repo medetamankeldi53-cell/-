@@ -143,25 +143,6 @@ export const Drive: React.FC = () => {
       <Sequence name="Line" from={at(LINE_AT)}>
         <Audio src={staticFile("drive/line_fx.wav")} volume={1} />
       </Sequence>
-      <Sequence name="Sub" from={at(LINE_AT + 0.1)} durationInFrames={f(1.9)}>
-        <Fade inF={4} outF={6}>
-          <div
-            style={{
-              position: "absolute",
-              bottom: 70,
-              width: "100%",
-              textAlign: "center",
-              fontFamily: "Montserrat",
-              fontWeight: 800,
-              fontSize: 54,
-              color: GOLD,
-              textShadow: "0 0 4px #000, 0 3px 14px rgba(0,0,0,0.9)",
-            }}
-          >
-            Анашым…
-          </div>
-        </Fade>
-      </Sequence>
 
       {/* Финальная надпись */}
       <Sequence name="End" from={at(SRC_LEN)} durationInFrames={f(END)}>
