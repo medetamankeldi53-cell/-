@@ -10,7 +10,7 @@ import {
 } from "remotion";
 import "../fonts";
 
-// «Анашым» — ночная трасса: едва не столкнулся → звонит маме.
+// «Анашым» — ночная трасса: едва не столкнулся и уцелел благодаря молитве матери → звонит ей.
 // Исходник 1280×720, 24 fps, 30 с. Хук: встречные фары (18–20 с) + сигнал → белая вспышка.
 // Звук: музыка и SFX сгенерированы в ElevenLabs (public/drive/music.mp3, horn.mp3, engine.mp3).
 
@@ -148,9 +148,9 @@ export const Drive: React.FC = () => {
       <Sequence name="End" from={at(SRC_LEN)} durationInFrames={f(END)}>
         <Fade inF={10} outF={8}>
           <Big size={64}>
-            Бүгін <span style={{ color: GOLD }}>анаңа</span>
+            Сені ананың <span style={{ color: GOLD }}>дұғасы</span>
             <br />
-            қоңырау шал.
+            сақтап жүр.
           </Big>
         </Fade>
       </Sequence>
