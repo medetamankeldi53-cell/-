@@ -101,7 +101,16 @@ export const Drive: React.FC = () => {
       <Sequence name="Film" from={f(HOOK)} durationInFrames={f(SRC_LEN)}>
         <Video
           src={staticFile(SRC)}
-          volume={0.7}
+          // 28,35–29,15 с — оригинальное «апа…» героя, глушим (вместо него наше «Анашым»)
+          volume={(fr) =>
+            0.7 *
+            interpolate(
+              fr / DRIVE_FPS,
+              [28.25, 28.35, 29.15, 29.3],
+              [1, 0, 0, 1],
+              { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
+            )
+          }
           objectFit="cover"
           style={{ width: "100%", height: "100%" }}
         />
