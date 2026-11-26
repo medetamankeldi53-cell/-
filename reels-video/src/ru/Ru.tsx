@@ -237,33 +237,76 @@ const KzMap: React.FC<{
 };
 
 // Плашка рода, выпрыгивает пружиной
-const Chip: React.FC<{ text: string; color: string; delay: number; big?: boolean }> = ({
+// Плашка рода: вылетает из карты (сверху), летит по дуге со светящимся шлейфом
+// и «приземляется» с пружиной ровно в момент, когда диктор называет род.
+const FLY = 14; // кадров полёта
+const Chip: React.FC<{ text: string; color: string; delay: number; big?: boolean; index?: number }> = ({
   text,
   color,
   delay,
   big,
+  index = 0,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const s = spring({ frame: frame - delay, fps, config: { damping: 12, stiffness: 160 } });
+  const jx = (index % 2 ? 1 : -1) * (120 + (index * 53) % 160);
+  const at = (fr: number) =>
+    interpolate(fr, [delay - FLY, delay], [0, 1], { ...clamp, easing: Easing.out(Easing.cubic) });
+  const pos = (p: number) => ({
+    x: (1 - p) * jx,
+    y: (1 - p) * -560 - Math.sin(p * Math.PI) * 60,
+    sc: 0.35 + 0.65 * p,
+  });
+  const p = at(frame);
+  const land = spring({ frame: frame - delay, fps, config: { damping: 9, stiffness: 260 } });
+  const bump = frame >= delay ? 1 + (1 - land) * 0.25 : 1;
+  const c = pos(p);
+  const base: React.CSSProperties = {
+    background: color,
+    color: INK,
+    fontFamily: "Montserrat",
+    fontWeight: 900,
+    fontSize: big ? 64 : 50,
+    padding: big ? "22px 44px" : "16px 32px",
+    borderRadius: 60,
+    whiteSpace: "nowrap",
+  };
+  if (p <= 0) return <div style={{ ...base, opacity: 0 }}>{text}</div>;
   return (
-    <div
-      style={{
-        transform: `scale(${s})`,
-        opacity: Math.min(1, s * 1.5),
-        background: color,
-        color: INK,
-        fontFamily: "Montserrat",
-        fontWeight: 900,
-        fontSize: big ? 64 : 50,
-        padding: big ? "22px 44px" : "16px 32px",
-        borderRadius: 60,
-        boxShadow: "0 10px 30px rgba(0,0,0,0.35)",
-      }}
-    >
-      {text}
-      <Sequence from={delay} durationInFrames={30}>
-        <Audio src={staticFile("ru/sfx_pluck.wav")} volume={0.32} />
+    <div style={{ position: "relative" }}>
+      {/* шлейф */}
+      {p < 1 &&
+        [0.25, 0.5, 0.75].map((k) => {
+          const g = pos(at(frame - k * 5));
+          return (
+            <div
+              key={k}
+              style={{
+                ...base,
+                position: "absolute",
+                inset: 0,
+                opacity: 0.25 * (1 - k),
+                transform: `translate(${g.x}px, ${g.y}px) scale(${g.sc})`,
+                filter: "blur(6px)",
+              }}
+            >
+              {text}
+            </div>
+          );
+        })}
+      <div
+        style={{
+          ...base,
+          opacity: Math.min(1, p * 2),
+          transform: `translate(${c.x}px, ${c.y}px) scale(${c.sc * bump})`,
+          filter: p < 1 ? `blur(${(1 - p) * 3}px)` : undefined,
+          boxShadow: `0 10px 30px rgba(0,0,0,0.35), 0 0 ${frame >= delay ? (1 - land) * 50 + 8 : 30}px ${color}`,
+        }}
+      >
+        {text}
+      </div>
+      <Sequence from={delay - 4} durationInFrames={30}>
+        <Audio src={staticFile("ru/sfx_chip.wav")} volume={0.45} />
       </Sequence>
     </div>
   );
@@ -291,7 +334,7 @@ const Chips: React.FC<{
     }}
   >
     {items.map((t, i) => (
-      <Chip key={t} text={t} color={color} delay={at ? at[i] : from + i * step} big={big} />
+      <Chip key={t} text={t} color={color} delay={at ? at[i] : from + i * step} big={big} index={i} />
     ))}
   </div>
 );
@@ -518,6 +561,8 @@ const Map3D: React.FC<{ zone: 0 | 1 | 2 }> = ({ zone }) => {
   const frame = useCurrentFrame();
   const rise = interpolate(frame, [6, 26], [0, 1], { ...clamp, easing: Easing.out(Easing.back(1.4)) });
   const tilt = interpolate(frame, [0, 20], [0, 34], { ...clamp, easing: ease });
+  const swing = interpolate(frame, [0, 22], [-35, 0], { ...clamp, easing: ease });
+  const drop = interpolate(frame, [0, 22], [-180, 0], { ...clamp, easing: ease });
   const sway = Math.sin(frame / 45) * 4;
   const color = ZONE_COL[zone];
   const dim: [number, number, number] = [1, 1, 1];
@@ -560,7 +605,7 @@ const Map3D: React.FC<{ zone: 0 | 1 | 2 }> = ({ zone }) => {
           position: "absolute",
           inset: 0,
           transformStyle: "preserve-3d",
-          transform: `rotateX(${tilt}deg) rotateZ(${sway}deg)`,
+          transform: `translateY(${drop}px) rotateY(${swing}deg) rotateX(${tilt}deg) rotateZ(${sway}deg)`,
           transformOrigin: "50% 60%",
         }}
       >
@@ -621,6 +666,62 @@ const Shock: React.FC<{ at: number; color: string }> = ({ at, color }) => {
         return <circle key={i} cx={Math.cos(a) * d} cy={Math.sin(a) * d} r={6} fill={GOLD} opacity={interpolate(t, [0, 26], [1, 0], clamp)} />;
       })}
     </svg>
+  );
+};
+
+// Заголовок по буквам: каждая буква поднимается с поворотом, затем по слову проходит блик
+const LetterTitle: React.FC<{ text: string; y: number; size: number; color: string }> = ({ text, y, size, color }) => {
+  const frame = useCurrentFrame();
+  const sweep = interpolate(frame, [18, 40], [-30, 130], clamp);
+  const letters = Array.from(text);
+  const word = (
+    <>
+      {letters.map((ch, i) => {
+        const p = interpolate(frame, [i * 2, i * 2 + 12], [0, 1], { ...clamp, easing: Easing.out(Easing.back(1.6)) });
+        return (
+          <span
+            key={i}
+            style={{
+              display: "inline-block",
+              whiteSpace: "pre",
+              opacity: p,
+              transform: `translateY(${(1 - p) * 60}px) rotateX(${(1 - p) * 80}deg)`,
+            }}
+          >
+            {ch}
+          </span>
+        );
+      })}
+    </>
+  );
+  const style: React.CSSProperties = {
+    position: "absolute",
+    top: y,
+    left: 0,
+    right: 0,
+    textAlign: "center",
+    fontFamily: "Montserrat",
+    fontWeight: 900,
+    fontSize: size,
+    lineHeight: 1.1,
+    perspective: 600,
+  };
+  return (
+    <>
+      <div style={{ ...style, color, textShadow: `0 6px 24px rgba(0,0,0,0.5), 0 0 30px ${color}55` }}>{word}</div>
+      {/* блик */}
+      <div
+        style={{
+          ...style,
+          color: "transparent",
+          backgroundImage: `linear-gradient(105deg, transparent ${sweep - 12}%, rgba(255,255,255,0.95) ${sweep}%, transparent ${sweep + 12}%)`,
+          WebkitBackgroundClip: "text",
+          backgroundClip: "text",
+        }}
+      >
+        {text}
+      </div>
+    </>
   );
 };
 
@@ -720,9 +821,7 @@ const ZoneScene: React.FC<{
     <>
       <Badge text={badge} color={color} />
       <Map3D zone={zone} />
-      <Title y={760} size={96} color={color}>
-        {title}
-      </Title>
+      <LetterTitle text={title} y={760} size={96} color={color} />
       <Title y={880} size={44} delay={5} color="rgba(255,255,255,0.85)">
         {where}
       </Title>
