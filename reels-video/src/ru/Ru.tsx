@@ -1,4 +1,4 @@
-import { Audio } from "@remotion/media";
+import { Audio, Video } from "@remotion/media";
 import {
   AbsoluteFill,
   Easing,
@@ -9,7 +9,6 @@ import {
   useCurrentFrame,
   useVideoConfig,
   random,
-  Img,
 } from "remotion";
 import "../fonts";
 import { CITIES, KZ_PATH, MAP_H, MAP_W, ZONE_KISHI, ZONE_ULY } from "./map";
@@ -955,24 +954,17 @@ const S8Outro: React.FC = () => {
 // Фон-иллюстрация сцены: медленный подъём камеры, без наездов (масштаб постоянный),
 // плюс затемнение сверху и снизу, чтобы карта и текст читались.
 const Backdrop: React.FC<{ img: string }> = ({ img }) => {
-  const frame = useCurrentFrame();
-  const { durationInFrames } = useVideoConfig();
-  const pan = interpolate(frame, [0, durationInFrames], [0, -70], clamp);
+  // ожившая иллюстрация: статичная камера, бесшовный цикл (public/ru/loop_*.mp4)
   return (
     <AbsoluteFill style={{ overflow: "hidden" }}>
-      <Img
-        src={staticFile(`ru/bg_${img}.jpg`)}
-        style={{
-          position: "absolute",
-          left: -40,
-          top: 0,
-          width: 1160,
-          height: 2062,
-          objectFit: "cover",
-          transform: `translateY(${pan}px)`,
-        }}
+      <Video
+        src={staticFile(`ru/loop_${img}.mp4`)}
+        loop
+        muted
+        objectFit="cover"
+        style={{ width: "100%", height: "100%" }}
       />
-      {SUN[img] && <SunFlare x={SUN[img][0]} y={SUN[img][1] + pan} />}
+      {SUN[img] && <SunFlare x={SUN[img][0]} y={SUN[img][1]} />}
       <AbsoluteFill
         style={{
           background:
@@ -983,8 +975,8 @@ const Backdrop: React.FC<{ img: string }> = ({ img }) => {
   );
 };
 
-// Солнце на иллюстрации: тёплое свечение и горизонтальный блик (координаты в кадре до панорамы)
-const SUN: Record<string, [number, number]> = { orta: [490, 1323], kishi: [102, 1270] };
+// Солнце на иллюстрации: тёплое свечение и горизонтальный блик (координаты в кадре 1080×1920)
+const SUN: Record<string, [number, number]> = { orta: [493, 1232], kishi: [132, 1183] };
 const SunFlare: React.FC<{ x: number; y: number }> = ({ x, y }) => {
   const frame = useCurrentFrame();
   const pulse = 0.75 + 0.25 * Math.sin(frame / 14);
