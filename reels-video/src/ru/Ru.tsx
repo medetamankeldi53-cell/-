@@ -9,6 +9,7 @@ import {
   useCurrentFrame,
   useVideoConfig,
   random,
+  Img,
 } from "remotion";
 import "../fonts";
 import { CITIES, KZ_PATH, MAP_H, MAP_W, ZONE_KISHI, ZONE_ULY } from "./map";
@@ -941,7 +942,40 @@ const S8Outro: React.FC = () => {
 
 // ---------- сборка ----------
 
-const SceneWrap: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+// Фон-иллюстрация сцены: медленный подъём камеры, без наездов (масштаб постоянный),
+// плюс затемнение сверху и снизу, чтобы карта и текст читались.
+const Backdrop: React.FC<{ img: string }> = ({ img }) => {
+  const frame = useCurrentFrame();
+  const { durationInFrames } = useVideoConfig();
+  const pan = interpolate(frame, [0, durationInFrames], [0, -70], clamp);
+  return (
+    <AbsoluteFill style={{ overflow: "hidden" }}>
+      <Img
+        src={staticFile(`ru/bg_${img}.jpg`)}
+        style={{
+          position: "absolute",
+          left: -40,
+          top: 0,
+          width: 1160,
+          height: 2062,
+          objectFit: "cover",
+          transform: `translateY(${pan}px)`,
+        }}
+      />
+      <AbsoluteFill
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(8,14,30,0.55) 0%, rgba(8,14,30,0.25) 45%, rgba(8,14,30,0.15) 65%, rgba(8,14,30,0.55) 100%)",
+        }}
+      />
+    </AbsoluteFill>
+  );
+};
+
+// фон для каждой сцены по порядку SCENES
+const BG = ["yurt", "yurt", "orta", "uly", "orta", "kishi", "kishi", "uly", "yurt", "yurt"];
+
+const SceneWrap: React.FC<{ children: React.ReactNode; bg: string }> = ({ children, bg }) => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
   // мягкий переход: плавное появление и угасание через фон
@@ -949,7 +983,12 @@ const SceneWrap: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     interpolate(frame, [0, 10], [0, 1], clamp),
     interpolate(frame, [durationInFrames - 10, durationInFrames], [1, 0], clamp),
   );
-  return <AbsoluteFill style={{ opacity: o }}>{children}</AbsoluteFill>;
+  return (
+    <AbsoluteFill style={{ opacity: o }}>
+      <Backdrop img={bg} />
+      {children}
+    </AbsoluteFill>
+  );
 };
 
 export const Ru: React.FC = () => {
@@ -999,7 +1038,7 @@ export const Ru: React.FC = () => {
       <Background />
       {SCENES.map((s, i) => (
         <Sequence key={s.id} name={`S${s.id}`} from={starts[i]} durationInFrames={lens[i]}>
-          <SceneWrap>{views[i]}</SceneWrap>
+          <SceneWrap bg={BG[i]}>{views[i]}</SceneWrap>
           {s.has && <Audio src={staticFile(`ru/${s.id}.mp3`)} />}
           {i > 0 && <Audio src={staticFile("sfx/whoosh.wav")} volume={0.08} />}
         </Sequence>
