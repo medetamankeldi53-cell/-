@@ -381,34 +381,6 @@ const Bubble: React.FC<{ text: string; delay: number }> = ({ text, delay }) => {
   );
 };
 
-// Переход между сценами: золотая полоса с орнаментом проходит по кадру
-const Wipe: React.FC = () => {
-  const frame = useCurrentFrame();
-  const x = interpolate(frame, [0, 14], [-1400, 1400], { ...clamp, easing: Easing.inOut(Easing.cubic) });
-  return (
-    <AbsoluteFill style={{ pointerEvents: "none" }}>
-      <svg width={1080} height={1920} style={{ position: "absolute", left: x }}>
-        <g transform="skewX(-18)">
-          <rect x={300} y={-200} width={260} height={2400} fill={GOLD} />
-          <rect x={590} y={-200} width={36} height={2400} fill={GOLD} opacity={0.6} />
-          {Array.from({ length: 14 }, (_, i) => (
-            <path
-              key={i}
-              transform={`translate(430 ${i * 160}) scale(0.9)`}
-              d="M0,0 C-40,-10 -60,-50 -35,-75 C-15,-95 15,-80 10,-58 M0,0 C40,-10 60,-50 35,-75 C15,-95 -15,-80 -10,-58"
-              fill="none"
-              stroke={INK}
-              strokeWidth={8}
-              strokeLinecap="round"
-              opacity={0.55}
-            />
-          ))}
-        </g>
-      </svg>
-    </AbsoluteFill>
-  );
-};
-
 // Шаңырақ — символ единства (рисуется штрихом)
 const Shanyrak: React.FC<{ size: number; draw: number; spin?: number }> = ({ size, draw, spin = 0 }) => {
   const L = 700;
@@ -775,9 +747,11 @@ const S8Outro: React.FC = () => {
 const SceneWrap: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
-  const o = interpolate(frame, [durationInFrames - 6, durationInFrames], [1, 0], {
-    extrapolateLeft: "clamp",
-  });
+  // мягкий переход: плавное появление и угасание через фон
+  const o = Math.min(
+    interpolate(frame, [0, 10], [0, 1], clamp),
+    interpolate(frame, [durationInFrames - 10, durationInFrames], [1, 0], clamp),
+  );
   return <AbsoluteFill style={{ opacity: o }}>{children}</AbsoluteFill>;
 };
 
@@ -830,12 +804,7 @@ export const Ru: React.FC = () => {
         <Sequence key={s.id} name={`S${s.id}`} from={starts[i]} durationInFrames={lens[i]}>
           <SceneWrap>{views[i]}</SceneWrap>
           {s.has && <Audio src={staticFile(`ru/${s.id}.mp3`)} />}
-          {i > 0 && <Audio src={staticFile("sfx/whoosh.wav")} volume={0.25} />}
-        </Sequence>
-      ))}
-      {starts.slice(1).map((st) => (
-        <Sequence key={st} from={st - 7} durationInFrames={16}>
-          <Wipe />
+          {i > 0 && <Audio src={staticFile("sfx/whoosh.wav")} volume={0.08} />}
         </Sequence>
       ))}
       <Audio
