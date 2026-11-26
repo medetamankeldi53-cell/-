@@ -38,8 +38,13 @@ export const SCENES: Scene[] = [
   { id: "05", dur: 7.36, has: true }, // Орта жүз
   { id: "06", dur: 4.8, has: true }, // Кіші жүз
   { id: "07", dur: 3.74, has: true }, // төре, қожа
+  { id: "09", dur: 9.04, has: true }, // ұрандар
+  { id: "10", dur: 9.0, has: false }, // мәтел
   { id: "08", dur: 6.14, has: true }, // финал
 ];
+// моменты внутри сцен (с) — по озвучке 09 и 10
+const URAN_AT = [3.25, 5.69, 8.04]; // начало «Бақтияр!», «Ақжол!», «Алатау!» в 09.mp3
+const MATEL_AT = [1.8, 4.2, 6.6];
 // последняя сцена держится на 1,5 с дольше, без пустого хвоста
 const lens = SCENES.map((s, i) => f(s.dur + PAD + (i === SCENES.length - 1 ? 1.5 : 0)));
 const starts = lens.map((_, i) => lens.slice(0, i).reduce((a, b) => a + b, 0));
@@ -567,6 +572,153 @@ const ZoneScene: React.FC<{
   );
 };
 
+// Ұран: три карточки, слово «впечатывается» в момент крика диктора
+const S9Uran: React.FC<{ at: number[] }> = ({ at }) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const rows: [string, string, string][] = [
+    ["ҰЛЫ ЖҮЗ", "БАҚТИЯР!", ULY],
+    ["ОРТА ЖҮЗ", "АҚЖОЛ!", ORTA],
+    ["КІШІ ЖҮЗ", "АЛАТАУ!", KISHI],
+  ];
+  return (
+    <>
+      <Title y={260} size={80}>
+        Жүздердің <span style={{ color: GOLD }}>ұраны</span>
+      </Title>
+      {rows.map(([z, w, c], i) => {
+        const d = f(at[i]);
+        const card = interpolate(frame, [d - 10, d], [0, 1], { ...clamp, easing: ease });
+        const s = spring({ frame: frame - d, fps, config: { damping: 9, stiffness: 220 } });
+        const shake = frame >= d && frame < d + 8 ? Math.sin(frame * 3) * (8 - (frame - d)) : 0;
+        return (
+          <div
+            key={z}
+            style={{
+              position: "absolute",
+              top: 520 + i * 380,
+              left: 80,
+              right: 80,
+              height: 320,
+              borderRadius: 36,
+              background: `linear-gradient(135deg, ${c} 0%, ${c}cc 100%)`,
+              opacity: card,
+              transform: `translateX(${(1 - card) * (i % 2 ? 300 : -300)}px) translateX(${shake}px)`,
+              boxShadow: "0 18px 50px rgba(0,0,0,0.4)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <div style={{ fontFamily: "Montserrat", fontWeight: 800, fontSize: 40, color: INK, letterSpacing: 6 }}>
+              {z}
+            </div>
+            <div
+              style={{
+                fontFamily: "Montserrat",
+                fontWeight: 900,
+                fontSize: 120,
+                color: "#fff",
+                transform: `scale(${interpolate(s, [0, 1], [2.2, 1])})`,
+                opacity: Math.min(1, s * 2),
+                textShadow: `0 6px 0 ${INK}`,
+              }}
+            >
+              {w}
+            </div>
+          </div>
+        );
+      })}
+    </>
+  );
+};
+
+// Простые иконки для мәтела
+const Icon: React.FC<{ kind: "syrnai" | "qalam" | "naiza"; color: string }> = ({ kind, color }) => (
+  <svg width={150} height={150} viewBox="0 0 100 100">
+    {kind === "syrnai" && (
+      <g fill="none" stroke={color} strokeWidth={6} strokeLinecap="round">
+        <path d="M15,80 L70,25" />
+        <path d="M70,25 Q85,12 90,20 Q95,30 80,35 Z" fill={color} />
+        {[0, 1, 2, 3].map((i) => (
+          <circle key={i} cx={28 + i * 10} cy={67 - i * 10} r={2.5} fill={color} />
+        ))}
+      </g>
+    )}
+    {kind === "qalam" && (
+      <g fill={color}>
+        <path d="M80,10 Q55,25 30,70 L25,85 L38,75 Q70,45 80,10 Z" />
+        <path d="M25,85 L20,92" stroke={color} strokeWidth={4} />
+      </g>
+    )}
+    {kind === "naiza" && (
+      <g stroke={color} strokeWidth={6} strokeLinecap="round" fill={color}>
+        <path d="M15,90 L72,28" />
+        <path d="M72,28 L88,8 L78,34 Z" />
+        <path d="M60,42 Q50,44 52,54" fill="none" strokeWidth={4} />
+      </g>
+    )}
+  </svg>
+);
+
+// Мәтел: три строки с иконками, по фразам диктора
+const S10Matel: React.FC<{ at: number[] }> = ({ at }) => {
+  const frame = useCurrentFrame();
+  const rows: ["syrnai" | "qalam" | "naiza", string, string, string][] = [
+    ["syrnai", "Ұлы жүзге —", "сырнай беріп, қой бақтыр", ULY],
+    ["qalam", "Орта жүзге —", "қалам беріп, дау шештір", ORTA],
+    ["naiza", "Кіші жүзге —", "найза беріп, жау шаптыр", KISHI],
+  ];
+  return (
+    <>
+      <Title y={260} size={76}>
+        Халық <span style={{ color: GOLD }}>мәтелі</span>
+      </Title>
+      {rows.map(([icon, a, b, c], i) => {
+        const p = interpolate(frame, [f(at[i]), f(at[i]) + 14], [0, 1], { ...clamp, easing: ease });
+        return (
+          <div
+            key={icon}
+            style={{
+              position: "absolute",
+              top: 540 + i * 360,
+              left: 70,
+              right: 70,
+              display: "flex",
+              alignItems: "center",
+              gap: 30,
+              opacity: p,
+              transform: `translateY(${(1 - p) * 50}px)`,
+            }}
+          >
+            <div
+              style={{
+                width: 200,
+                height: 200,
+                borderRadius: 100,
+                border: `6px solid ${c}`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: "rgba(255,255,255,0.05)",
+                flexShrink: 0,
+                transform: `rotate(${(1 - p) * -40}deg)`,
+              }}
+            >
+              <Icon kind={icon} color={c} />
+            </div>
+            <div style={{ fontFamily: "Montserrat", lineHeight: 1.15 }}>
+              <div style={{ fontWeight: 900, fontSize: 56, color: c }}>{a}</div>
+              <div style={{ fontWeight: 800, fontSize: 48, color: "#fff" }}>{b}</div>
+            </div>
+          </div>
+        );
+      })}
+    </>
+  );
+};
+
 const S7Out: React.FC = () => (
   <>
     <Title y={520} size={70}>
@@ -667,6 +819,8 @@ export const Ru: React.FC = () => {
       chipsStep={f(0.8)}
     />,
     <S7Out key="7" />,
+    <S9Uran key="9" at={URAN_AT} />,
+    <S10Matel key="10" at={MATEL_AT} />,
     <S8Outro key="8" />,
   ];
   return (
