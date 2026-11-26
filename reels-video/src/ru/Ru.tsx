@@ -34,6 +34,7 @@ const PAD = 0.7; // пауза после реплики
 type Scene = { id: string; dur: number; has: boolean };
 // dur — длительность озвучки (с)
 export const SCENES: Scene[] = [
+  { id: "00", dur: 1.7, has: false }, // ударный хук «БАҚТИЯР!» (звук из 09.mp3)
   { id: "01", dur: 3.76, has: true }, // хук
   { id: "02", dur: 5.12, has: true }, // жеті ата
   { id: "03", dur: 5.52, has: true }, // үш жүз
@@ -672,6 +673,55 @@ const Shock: React.FC<{ at: number; color: string }> = ({ at, color }) => {
 
 // ---------- сцены ----------
 
+// Ударный хук: с первого кадра — ұран «БАҚТИЯР!», тряска, волна, затем вопрос
+const S0Shout: React.FC = () => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const s = spring({ frame, fps, config: { damping: 14, stiffness: 260 } });
+  const shake = frame < 12 ? Math.sin(frame * 2.7) * (12 - frame) * 2.2 : 0;
+  const flash = interpolate(frame, [0, 2, 8], [0, 0.7, 0], clamp);
+  return (
+    <>
+      {/* крик из сцены ұранов: «Бақтияр!» (09.mp3, 3,25–4,23 с) */}
+      <Audio src={staticFile("ru/09.mp3")} trimBefore={f(3.2)} trimAfter={f(4.3)} volume={1.1} />
+      <Audio src={staticFile("ru/sfx_impact.wav")} volume={0.7} />
+      <AbsoluteFill style={{ transform: `translate(${shake}px, ${shake * 0.6}px)` }}>
+        <div style={{ position: "absolute", top: 640, left: 0, right: 0, height: 300 }}>
+          <Shock at={1} color={ULY} />
+        </div>
+        <div
+          style={{
+            position: "absolute",
+            top: 660,
+            left: 0,
+            right: 0,
+            textAlign: "center",
+            fontFamily: "Montserrat",
+            fontWeight: 900,
+            fontSize: 168,
+            color: "#fff",
+            transform: `scale(${Math.max(0.95, 1 + (1 - s) * 0.2)})`, // с 1-го кадра слово читается целиком
+            textShadow: `0 8px 0 ${INK}, 0 0 60px ${ULY}`,
+          }}
+        >
+          БАҚТИЯР!
+        </div>
+      </AbsoluteFill>
+      <Sequence from={f(0.75)}>
+        <Title y={930} size={64}>
+          Бұл не деген <span style={{ color: GOLD }}>сөз?</span>
+        </Title>
+      </Sequence>
+      <Sequence from={f(1.25)}>
+        <Title y={1030} size={42} color="rgba(255,255,255,0.85)">
+          Соңына дейін көр 👇
+        </Title>
+      </Sequence>
+      <AbsoluteFill style={{ backgroundColor: "#fff", opacity: flash }} />
+    </>
+  );
+};
+
 const S1Hook: React.FC = () => (
   <>
     <Title y={300} size={76}>
@@ -1257,14 +1307,14 @@ const LightLeak: React.FC<{ seed: number }> = ({ seed }) => {
 };
 
 // фон для каждой сцены по порядку SCENES
-const BG = ["yurt", "yurt", "orta", "uly", "orta", "kishi", "kishi", "uly", "yurt", "yurt"];
+const BG = ["uly", "yurt", "yurt", "orta", "uly", "orta", "kishi", "kishi", "uly", "yurt", "yurt"];
 
-const SceneWrap: React.FC<{ children: React.ReactNode; bg: string }> = ({ children, bg }) => {
+const SceneWrap: React.FC<{ children: React.ReactNode; bg: string; first?: boolean }> = ({ children, bg, first }) => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
   // мягкий переход: плавное появление и угасание через фон
   const o = Math.min(
-    interpolate(frame, [0, 10], [0, 1], clamp),
+    first ? 1 : interpolate(frame, [0, 10], [0, 1], clamp), // первый кадр ролика — сразу в полную силу
     interpolate(frame, [durationInFrames - 10, durationInFrames], [1, 0], clamp),
   );
   return (
@@ -1277,6 +1327,7 @@ const SceneWrap: React.FC<{ children: React.ReactNode; bg: string }> = ({ childr
 
 export const Ru: React.FC = () => {
   const views = [
+    <S0Shout key="0" />,
     <S1Hook key="1" />,
     <S2Ata key="2" />,
     <S3Map key="3" />,
@@ -1322,7 +1373,7 @@ export const Ru: React.FC = () => {
       <Background />
       {SCENES.map((s, i) => (
         <Sequence key={s.id} name={`S${s.id}`} from={starts[i]} durationInFrames={lens[i]}>
-          <SceneWrap bg={BG[i]}>{views[i]}</SceneWrap>
+          <SceneWrap bg={BG[i]} first={i === 0}>{views[i]}</SceneWrap>
           {s.has && <Audio src={staticFile(`ru/${s.id}.mp3`)} />}
           {i > 0 && <Audio src={staticFile("sfx/whoosh.wav")} volume={0.08} />}
         </Sequence>
