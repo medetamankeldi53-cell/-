@@ -9,6 +9,7 @@ import {
   useCurrentFrame,
   useVideoConfig,
   random,
+  Img,
 } from "remotion";
 import "../fonts";
 import { CITIES, KZ_PATH, MAP_H, MAP_W, ZONE_KISHI, ZONE_ULY } from "./map";
@@ -48,7 +49,7 @@ export const SCENES: Scene[] = [
 const URAN_AT = [3.25, 5.69, 8.04]; // начало «Бақтияр!», «Ақжол!», «Алатау!» в 09.mp3
 const MATEL_AT = [2.0, 4.85, 7.8]; // начало строк мәтела в 10.mp3
 // последняя сцена держится на 1,5 с дольше, без пустого хвоста
-const lens = SCENES.map((s, i) => f(s.dur + PAD + (i === SCENES.length - 1 ? 1.5 : 0)));
+const lens = SCENES.map((s, i) => f(s.dur + PAD + (i === SCENES.length - 1 ? 3.6 : 0)));
 const starts = lens.map((_, i) => lens.slice(0, i).reduce((a, b) => a + b, 0));
 export const RU_DURATION = lens.reduce((a, b) => a + b, 0);
 
@@ -1052,10 +1053,80 @@ const S7Out: React.FC = () => (
   </>
 );
 
+// Созвездие «АЛАШ»: звёзды в вершинах букв, линии рисуются как в звёздной карте
+const LW = 150;
+const LH = 220;
+const LGAP = 50;
+const CX0 = (1080 - (4 * LW + 3 * LGAP)) / 2;
+const CY0 = 300;
+// буквы в единичной системе 0..1 (x), 0..1 (y): [точки, отрезки]
+const GLYPH: Record<string, [[number, number][], [number, number][]]> = {
+  А: [[[0, 1], [0.5, 0], [1, 1], [0.22, 0.62], [0.78, 0.62]], [[0, 1], [1, 2], [3, 4]]],
+  Л: [[[0, 1], [0.32, 0], [1, 0], [1, 1]], [[0, 1], [1, 2], [2, 3]]],
+  Ш: [[[0, 0], [0, 1], [0.5, 1], [1, 1], [1, 0], [0.5, 0]], [[0, 1], [1, 2], [2, 3], [3, 4], [5, 2]]],
+};
+const CONST_STARS: [number, number][] = [];
+const CONST_LINES: [number, number][] = [];
+Array.from("АЛАШ").forEach((ch, li) => {
+  const [pts, segs] = GLYPH[ch];
+  const base = CONST_STARS.length;
+  pts.forEach(([u, v]) => CONST_STARS.push([CX0 + li * (LW + LGAP) + u * LW, CY0 + v * LH]));
+  segs.forEach(([a, b]) => CONST_LINES.push([base + a, base + b]));
+});
+
+const Constellation: React.FC<{ start: number }> = ({ start }) => {
+  const frame = useCurrentFrame() - start;
+  if (frame < 0) return null;
+  // шаңырақ рассыпается: звёзды летят из его центра (540, 578) к своим местам
+  const fly = (i: number) =>
+    interpolate(frame, [i * 0.8, i * 0.8 + 22], [0, 1], { ...clamp, easing: Easing.out(Easing.cubic) });
+  return (
+    <svg width={1080} height={1920} style={{ position: "absolute", left: 0, top: 0, overflow: "visible" }}>
+      {CONST_LINES.map(([a, b], i) => {
+        const [x1, y1] = CONST_STARS[a];
+        const [x2, y2] = CONST_STARS[b];
+        const len = Math.hypot(x2 - x1, y2 - y1);
+        const d = interpolate(frame, [28 + i * 3, 40 + i * 3], [0, 1], { ...clamp, easing: Easing.inOut(Easing.quad) });
+        return (
+          <line
+            key={i}
+            x1={x1}
+            y1={y1}
+            x2={x2}
+            y2={y2}
+            stroke="#ffe9b8"
+            strokeWidth={3}
+            strokeLinecap="round"
+            strokeDasharray={len}
+            strokeDashoffset={len * (1 - d)}
+            opacity={0.75}
+            style={{ filter: "drop-shadow(0 0 6px #ffd27a)" }}
+          />
+        );
+      })}
+      {CONST_STARS.map(([x, y], i) => {
+        const p = fly(i);
+        const sx = 540 + (x - 540) * p;
+        const sy = 578 + (y - 578) * p;
+        const tw = 0.7 + 0.3 * Math.sin(frame / 4 + i * 1.7);
+        const r = (5 + (i % 3) * 1.5) * tw;
+        return (
+          <g key={i} opacity={Math.min(1, p * 3)}>
+            <circle cx={sx} cy={sy} r={r * 4} fill="#ffd27a" opacity={0.18} />
+            <circle cx={sx} cy={sy} r={r} fill="#fff" />
+            <path d={`M${sx - r * 3},${sy} L${sx + r * 3},${sy} M${sx},${sy - r * 3} L${sx},${sy + r * 3}`} stroke="#fff" strokeWidth={1.5} opacity={0.6 * tw} />
+          </g>
+        );
+      })}
+    </svg>
+  );
+};
+
 const S8Outro: React.FC = () => {
   const frame = useCurrentFrame();
   const gold = interpolate(frame, [f(1.0), f(1.6)], [0, 1], clamp);
   const lock = interpolate(frame, [f(2.0), f(2.6)], [0, 1], clamp);
+  const out = interpolate(frame, [f(3.0), f(3.5)], [1, 0], clamp); // шаңырақ рассыпается в звёзды
   const spin = frame * 0.35;
   const glow = 0.5 + 0.5 * Math.sin(frame / 8);
   return (
@@ -1075,18 +1146,32 @@ const S8Outro: React.FC = () => {
         tint={[1, 1, 1]}
         gold={gold}
         spin={spin}
+        fade={out}
       />
       <div
         style={{
           position: "absolute",
           top: 330 + 248 - 220,
           left: 90 + 450 - 220,
-          opacity: lock,
+          opacity: lock * out,
+          transform: `scale(${1 + (1 - out) * 0.6})`,
           filter: `drop-shadow(0 0 ${12 + glow * 18}px ${GOLD})`,
         }}
       >
         <Shanyrak size={440} draw={lock} spin={spin} />
       </div>
+      <Constellation start={f(3.0)} />
+      <Sequence from={f(3.0)} durationInFrames={f(3)}>
+        <Audio src={staticFile("ru/sfx_shimmer.wav")} volume={0.45} />
+      </Sequence>
+      <Sequence from={f(4.0)} durationInFrames={f(3)}>
+        <Audio src={staticFile("sfx/chime.wav")} volume={0.35} />
+      </Sequence>
+      <Sequence from={f(5.2)}>
+        <Title y={590} size={40} color="rgba(255,233,184,0.95)">
+          Бәріміз — бір Алаштың баласымыз
+        </Title>
+      </Sequence>
       <Title y={940} size={88}>
         Рулар көп —
         <br />
@@ -1254,6 +1339,97 @@ export const Ru: React.FC = () => {
           interpolate(fr, [0, 20, RU_DURATION - 45, RU_DURATION], [0, 0.22, 0.22, 0], clamp)
         }
       />
+    </AbsoluteFill>
+  );
+};
+
+// Обложка для Reels: надпись за горами Алатау, карта жүзов сверху
+export const RuCover: React.FC = () => {
+  const mask = {
+    WebkitMaskImage: `url(${staticFile("ru/matte_uly.png")})`,
+    maskImage: `url(${staticFile("ru/matte_uly.png")})`,
+    WebkitMaskSize: "100% 100%",
+    maskSize: "100% 100%",
+  };
+  const bg = (
+    <>
+      <Img src={staticFile("ru/bg_uly.jpg")} style={{ width: 1080, height: 1920, objectFit: "cover" }} />
+      <AbsoluteFill style={{ background: SHADE }} />
+    </>
+  );
+  return (
+    <AbsoluteFill style={{ backgroundColor: BG1 }}>
+      <AbsoluteFill>{bg}</AbsoluteFill>
+      <div
+        style={{
+          position: "absolute",
+          top: 790,
+          left: 0,
+          right: 0,
+          textAlign: "center",
+          fontFamily: "Montserrat",
+          fontWeight: 900,
+          lineHeight: 0.95,
+          color: GOLD,
+          textShadow: `0 0 40px ${GOLD}99, 0 10px 40px rgba(0,0,0,0.5)`,
+        }}
+      >
+        <div style={{ fontSize: 118, color: "#fff" }}>ҚАЗАҚТЫҢ</div>
+        <div style={{ fontSize: 190 }}>РУЛАРЫ</div>
+      </div>
+      <AbsoluteFill style={mask}>{bg}</AbsoluteFill>
+      <KzMap draw={1} fill={[1, 1, 1]} x={140} y={170} scale={0.9} labels={1} />
+      <div
+        style={{
+          position: "absolute",
+          bottom: 250,
+          left: 0,
+          right: 0,
+          display: "flex",
+          justifyContent: "center",
+          gap: 20,
+        }}
+      >
+        {(
+          [
+            ["ҰЛЫ ЖҮЗ", ULY],
+            ["ОРТА ЖҮЗ", ORTA],
+            ["КІШІ ЖҮЗ", KISHI],
+          ] as const
+        ).map(([t, c]) => (
+          <div
+            key={t}
+            style={{
+              background: c,
+              color: INK,
+              fontFamily: "Montserrat",
+              fontWeight: 900,
+              fontSize: 40,
+              padding: "14px 26px",
+              borderRadius: 50,
+              boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
+            }}
+          >
+            {t}
+          </div>
+        ))}
+      </div>
+      <div
+        style={{
+          position: "absolute",
+          bottom: 160,
+          left: 0,
+          right: 0,
+          textAlign: "center",
+          fontFamily: "Montserrat",
+          fontWeight: 800,
+          fontSize: 46,
+          color: "#fff",
+          textShadow: "0 4px 18px rgba(0,0,0,0.8)",
+        }}
+      >
+        Сен қай рудансың? 👇
+      </div>
     </AbsoluteFill>
   );
 };
