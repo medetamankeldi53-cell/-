@@ -40,9 +40,10 @@ export const SCENES: Scene[] = [
   { id: "07", dur: 3.74, has: true }, // төре, қожа
   { id: "08", dur: 6.14, has: true }, // финал
 ];
-const lens = SCENES.map((s) => f(s.dur + PAD));
+// последняя сцена держится на 1,5 с дольше, без пустого хвоста
+const lens = SCENES.map((s, i) => f(s.dur + PAD + (i === SCENES.length - 1 ? 1.5 : 0)));
 const starts = lens.map((_, i) => lens.slice(0, i).reduce((a, b) => a + b, 0));
-export const RU_DURATION = lens.reduce((a, b) => a + b, 0) + f(1.0);
+export const RU_DURATION = lens.reduce((a, b) => a + b, 0);
 
 const ease = Easing.bezier(0.16, 1, 0.3, 1);
 const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
@@ -80,6 +81,23 @@ const Background: React.FC = () => {
           [990, 1760, 1.5, 10],
           [540, 1880, 1.0, 0],
         ].map(([x, y, s, r], i) => horn(x, y, s, r, i))}
+        {/* золотая пыль */}
+        {Array.from({ length: 34 }, (_, i) => {
+          const sx = (i * 263) % 1080;
+          const sp = 0.6 + ((i * 37) % 10) / 10;
+          const y = 1920 - ((frame * sp * 1.4 + i * 151) % 2100);
+          const x = sx + Math.sin(frame / 40 + i) * 18;
+          return <circle key={i} cx={x} cy={y} r={2 + (i % 3)} fill={GOLD} opacity={0.18 + (i % 4) * 0.06} />;
+        })}
+        {/* дала: два слоя холмов с параллаксом */}
+        <path
+          d={`M0,1700 Q180,${1640 + Math.sin(frame / 70) * 6} 360,1690 T720,1680 T1080,1670 L1080,1920 L0,1920 Z`}
+          fill="#16233f"
+        />
+        <path
+          d={`M0,1780 Q240,${1730 + Math.sin(frame / 55) * 8} 520,1775 T1080,1760 L1080,1920 L0,1920 Z`}
+          fill="#111c33"
+        />
       </svg>
     </AbsoluteFill>
   );
@@ -127,7 +145,10 @@ const KzMap: React.FC<{
   scale: number;
   labels?: number; // 0..1
   cities?: number;
-}> = ({ draw, fill, dim = [0, 0, 0], x, y, scale, labels = 0, cities = 0 }) => {
+  glow?: string; // цвет пульсирующего свечения
+}> = ({ draw, fill, dim = [0, 0, 0], x, y, scale, labels = 0, cities = 0, glow }) => {
+  const frame = useCurrentFrame();
+  const g = glow ? 10 + Math.sin(frame / 7) * 8 : 0;
   const len = 4200;
   const op = (i: number) => fill[i] * (1 - dim[i] * 0.75);
   return (
@@ -135,7 +156,13 @@ const KzMap: React.FC<{
       width={MAP_W * scale}
       height={MAP_H * scale}
       viewBox={`0 0 ${MAP_W} ${MAP_H}`}
-      style={{ position: "absolute", left: x, top: y, overflow: "visible" }}
+      style={{
+        position: "absolute",
+        left: x,
+        top: y,
+        overflow: "visible",
+        filter: glow ? `drop-shadow(0 0 ${g}px ${glow})` : undefined,
+      }}
     >
       <defs>
         <clipPath id="kz">
@@ -349,6 +376,95 @@ const Bubble: React.FC<{ text: string; delay: number }> = ({ text, delay }) => {
   );
 };
 
+// Переход между сценами: золотая полоса с орнаментом проходит по кадру
+const Wipe: React.FC = () => {
+  const frame = useCurrentFrame();
+  const x = interpolate(frame, [0, 14], [-1400, 1400], { ...clamp, easing: Easing.inOut(Easing.cubic) });
+  return (
+    <AbsoluteFill style={{ pointerEvents: "none" }}>
+      <svg width={1080} height={1920} style={{ position: "absolute", left: x }}>
+        <g transform="skewX(-18)">
+          <rect x={300} y={-200} width={260} height={2400} fill={GOLD} />
+          <rect x={590} y={-200} width={36} height={2400} fill={GOLD} opacity={0.6} />
+          {Array.from({ length: 14 }, (_, i) => (
+            <path
+              key={i}
+              transform={`translate(430 ${i * 160}) scale(0.9)`}
+              d="M0,0 C-40,-10 -60,-50 -35,-75 C-15,-95 15,-80 10,-58 M0,0 C40,-10 60,-50 35,-75 C15,-95 -15,-80 -10,-58"
+              fill="none"
+              stroke={INK}
+              strokeWidth={8}
+              strokeLinecap="round"
+              opacity={0.55}
+            />
+          ))}
+        </g>
+      </svg>
+    </AbsoluteFill>
+  );
+};
+
+// Шаңырақ — символ единства (рисуется штрихом)
+const Shanyrak: React.FC<{ size: number; draw: number; spin?: number }> = ({ size, draw, spin = 0 }) => {
+  const L = 700;
+  const st = { fill: "none", stroke: GOLD, strokeWidth: 10, strokeLinecap: "round" as const, strokeDasharray: L, strokeDashoffset: L * (1 - draw) };
+  return (
+    <svg width={size} height={size} viewBox="-120 -120 240 240" style={{ transform: `rotate(${spin}deg)` }}>
+      {/* уықтар — лучи от шаңырақа, как в юрте */}
+      {Array.from({ length: 24 }, (_, i) => {
+        const a = (i / 24) * Math.PI * 2;
+        return (
+          <line
+            key={i}
+            x1={Math.cos(a) * 104}
+            y1={Math.sin(a) * 104}
+            x2={Math.cos(a) * 118}
+            y2={Math.sin(a) * 118}
+            stroke={GOLD}
+            strokeWidth={6}
+            strokeLinecap="round"
+            opacity={draw}
+          />
+        );
+      })}
+      <circle r={100} {...st} />
+      <circle r={86} {...st} strokeWidth={5} />
+      {[-45, 0, 45].map((d) => (
+        <g key={d}>
+          <path d={`M${d},-86 Q${d * 1.6},0 ${d},86`} {...st} strokeWidth={8} />
+          <path d={`M-86,${d} Q0,${d * 1.6} 86,${d}`} {...st} strokeWidth={8} />
+        </g>
+      ))}
+    </svg>
+  );
+};
+
+// Бейдж «1/3» для сцен жүзов
+const Badge: React.FC<{ text: string; color: string }> = ({ text, color }) => {
+  const frame = useCurrentFrame();
+  const p = interpolate(frame, [4, 16], [0, 1], { ...clamp, easing: ease });
+  return (
+    <div
+      style={{
+        position: "absolute",
+        top: 70,
+        right: 60,
+        padding: "10px 26px",
+        borderRadius: 40,
+        border: `4px solid ${color}`,
+        color,
+        fontFamily: "Montserrat",
+        fontWeight: 900,
+        fontSize: 40,
+        opacity: p,
+        transform: `translateX(${(1 - p) * 60}px)`,
+      }}
+    >
+      {text}
+    </div>
+  );
+};
+
 // ---------- сцены ----------
 
 const S1Hook: React.FC = () => (
@@ -431,13 +547,15 @@ const ZoneScene: React.FC<{
   chipsFrom: number;
   chipsStep: number;
   chipsAt?: number[];
-}> = ({ zone, title, where, clans, chipsFrom, chipsStep, chipsAt }) => {
+  badge: string;
+}> = ({ zone, title, where, clans, chipsFrom, chipsStep, chipsAt, badge }) => {
   const color = [KISHI, ORTA, ULY][zone];
   const dim: [number, number, number] = [1, 1, 1];
   dim[zone] = 0;
   return (
     <>
-      <KzMap draw={1} fill={[1, 1, 1]} dim={dim} x={90} y={170} scale={1} labels={1} />
+      <Badge text={badge} color={color} />
+      <KzMap draw={1} fill={[1, 1, 1]} dim={dim} x={90} y={170} scale={1} labels={1} glow={color} />
       <Title y={760} size={96} color={color}>
         {title}
       </Title>
@@ -462,17 +580,27 @@ const S7Out: React.FC = () => (
 
 const S8Outro: React.FC = () => {
   const frame = useCurrentFrame();
-  const merge = interpolate(frame, [f(0.3), f(1.6)], [0, 1], { ...clamp, easing: ease });
+  const merge = interpolate(frame, [f(0.2), f(1.4)], [0, 1], { ...clamp, easing: ease });
+  const draw = interpolate(frame, [f(1.0), f(2.4)], [0, 1], { ...clamp, easing: Easing.inOut(Easing.cubic) });
+  const spin = frame * 0.25;
+  const dots: [string, number][] = [
+    [ULY, -90],
+    [ORTA, 30],
+    [KISHI, 150],
+  ];
   return (
     <>
-      <svg
-        width={MAP_W * 1.1}
-        height={MAP_H * 1.1}
-        viewBox={`0 0 ${MAP_W} ${MAP_H}`}
-        style={{ position: "absolute", left: 45, top: 300 }}
-      >
-        <path d={KZ_PATH} fill={GOLD} opacity={0.25 + merge * 0.75} stroke="#fff" strokeWidth={4} />
+      <svg width={1080} height={900} style={{ position: "absolute", top: 180 }}>
+        {dots.map(([c, ang]) => {
+          const r = 260 * (1 - merge);
+          const x = 540 + Math.cos((ang * Math.PI) / 180) * r;
+          const y = 420 + Math.sin((ang * Math.PI) / 180) * r;
+          return <circle key={c} cx={x} cy={y} r={120} fill={c} opacity={0.85 * (1 - draw * 0.8)} style={{ mixBlendMode: "screen" }} />;
+        })}
       </svg>
+      <div style={{ position: "absolute", top: 380, left: 340, opacity: draw }}>
+        <Shanyrak size={400} draw={draw} spin={spin} />
+      </div>
       <Title y={940} size={88}>
         Рулар көп —
         <br />
@@ -509,6 +637,7 @@ export const Ru: React.FC = () => {
     <ZoneScene
       key="4"
       zone={2}
+      badge="1 / 3"
       title="ҰЛЫ ЖҮЗ"
       where="Жетісу мен оңтүстік"
       clans={["Үйсін", "Дулат", "Албан", "Суан", "Шапырашты", "Ысты", "Ошақты", "Жалайыр", "Қаңлы"]}
@@ -520,6 +649,7 @@ export const Ru: React.FC = () => {
     <ZoneScene
       key="5"
       zone={1}
+      badge="2 / 3"
       title="ОРТА ЖҮЗ"
       where="Сарыарқа мен шығыс"
       clans={["Арғын", "Найман", "Керей", "Уақ", "Қыпшақ", "Қоңырат"]}
@@ -529,6 +659,7 @@ export const Ru: React.FC = () => {
     <ZoneScene
       key="6"
       zone={0}
+      badge="3 / 3"
       title="КІШІ ЖҮЗ"
       where="Батыс өңір"
       clans={["Әлімұлы", "Байұлы", "Жетіру"]}
@@ -548,7 +679,17 @@ export const Ru: React.FC = () => {
           {i > 0 && <Audio src={staticFile("sfx/whoosh.wav")} volume={0.25} />}
         </Sequence>
       ))}
-      <Audio src={staticFile("sfx/drone.wav")} volume={0.12} loop />
+      {starts.slice(1).map((st) => (
+        <Sequence key={st} from={st - 7} durationInFrames={16}>
+          <Wipe />
+        </Sequence>
+      ))}
+      <Audio
+        src={staticFile("ru/music.mp3")}
+        volume={(fr) =>
+          interpolate(fr, [0, 20, RU_DURATION - 45, RU_DURATION], [0, 0.22, 0.22, 0], clamp)
+        }
+      />
     </AbsoluteFill>
   );
 };
