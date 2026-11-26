@@ -39,7 +39,7 @@ export const SCENES: Scene[] = [
   { id: "03", dur: 5.52, has: true }, // үш жүз
   { id: "04", dur: 11.68, has: true }, // Ұлы жүз
   { id: "05", dur: 7.36, has: true }, // Орта жүз
-  { id: "06", dur: 4.8, has: true }, // Кіші жүз
+  { id: "06", dur: 4.81, has: true }, // Кіші жүз («Кіші жүз» вклеено из 03.mp3 — там произносится верно)
   { id: "07", dur: 3.74, has: true }, // төре, қожа
   { id: "09", dur: 9.04, has: true }, // ұрандар
   { id: "10", dur: 10.63, has: true }, // мәтел
