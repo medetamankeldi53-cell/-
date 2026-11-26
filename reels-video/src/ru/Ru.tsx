@@ -34,11 +34,11 @@ export const SCENES: Scene[] = [
   { id: "01", dur: 3.76, has: true }, // хук
   { id: "02", dur: 5.12, has: true }, // жеті ата
   { id: "03", dur: 5.52, has: true }, // үш жүз
-  { id: "04", dur: 8.0, has: false }, // Ұлы жүз
+  { id: "04", dur: 11.68, has: true }, // Ұлы жүз
   { id: "05", dur: 7.36, has: true }, // Орта жүз
   { id: "06", dur: 4.8, has: true }, // Кіші жүз
-  { id: "07", dur: 3.2, has: false }, // төре, қожа
-  { id: "08", dur: 5.0, has: false }, // финал
+  { id: "07", dur: 3.74, has: true }, // төре, қожа
+  { id: "08", dur: 6.14, has: true }, // финал
 ];
 const lens = SCENES.map((s) => f(s.dur + PAD));
 const starts = lens.map((_, i) => lens.slice(0, i).reduce((a, b) => a + b, 0));
@@ -239,7 +239,8 @@ const Chips: React.FC<{
   step: number; // кадров между плашками
   top: number;
   big?: boolean;
-}> = ({ items, color, from, step, top, big }) => (
+  at?: number[]; // точные кадры появления (по озвучке), иначе from + i·step
+}> = ({ items, color, from, step, top, big, at }) => (
   <div
     style={{
       position: "absolute",
@@ -253,7 +254,7 @@ const Chips: React.FC<{
     }}
   >
     {items.map((t, i) => (
-      <Chip key={t} text={t} color={color} delay={from + i * step} big={big} />
+      <Chip key={t} text={t} color={color} delay={at ? at[i] : from + i * step} big={big} />
     ))}
   </div>
 );
@@ -429,7 +430,8 @@ const ZoneScene: React.FC<{
   clans: string[];
   chipsFrom: number;
   chipsStep: number;
-}> = ({ zone, title, where, clans, chipsFrom, chipsStep }) => {
+  chipsAt?: number[];
+}> = ({ zone, title, where, clans, chipsFrom, chipsStep, chipsAt }) => {
   const color = [KISHI, ORTA, ULY][zone];
   const dim: [number, number, number] = [1, 1, 1];
   dim[zone] = 0;
@@ -442,7 +444,7 @@ const ZoneScene: React.FC<{
       <Title y={880} size={44} delay={5} color="rgba(255,255,255,0.85)">
         {where}
       </Title>
-      <Chips items={clans} color={color} from={chipsFrom} step={chipsStep} top={1020} />
+      <Chips items={clans} color={color} from={chipsFrom} step={chipsStep} top={1020} at={chipsAt} />
     </>
   );
 };
@@ -454,7 +456,7 @@ const S7Out: React.FC = () => (
       <br />
       <span style={{ color: GOLD }}>кірмейді</span>
     </Title>
-    <Chips items={["Төре", "Қожа"]} color="#cfc6ff" from={f(0.5)} step={f(0.5)} top={900} big />
+    <Chips items={["Төре", "Қожа"]} color="#cfc6ff" from={f(0.6)} step={f(0.6)} top={900} big />
   </>
 );
 
@@ -476,7 +478,7 @@ const S8Outro: React.FC = () => {
         <br />
         <span style={{ color: GOLD }}>халық біреу</span>
       </Title>
-      <Sequence from={f(2.4)}>
+      <Sequence from={f(3.3)}>
         <Title y={1300} size={66}>
           Сен қай рудансың?
         </Title>
@@ -512,6 +514,8 @@ export const Ru: React.FC = () => {
       clans={["Үйсін", "Дулат", "Албан", "Суан", "Шапырашты", "Ысты", "Ошақты", "Жалайыр", "Қаңлы"]}
       chipsFrom={f(2.3)}
       chipsStep={f(0.6)}
+      // начало каждого названия в 04.mp3 (silencedetect)
+      chipsAt={[3.2, 4.15, 5.18, 5.9, 6.85, 8.01, 8.87, 9.84, 10.89].map(f)}
     />,
     <ZoneScene
       key="5"
