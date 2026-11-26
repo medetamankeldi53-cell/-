@@ -8,9 +8,11 @@ import {
   staticFile,
   useCurrentFrame,
   useVideoConfig,
+  random,
 } from "remotion";
 import "../fonts";
 import { CITIES, KZ_PATH, MAP_H, MAP_W, ZONE_KISHI, ZONE_ULY } from "./map";
+import { MAP_PTS, SHANYRAK_PTS } from "./points";
 
 // «Қазақтың рулары» — 2D-анимация 1080×1920, диктор Alex Bell (ElevenLabs).
 // Озвучка по сценам: public/ru/NN.mp3. Если файла сцены ещё нет — сцена идёт без звука
@@ -442,6 +444,183 @@ const Badge: React.FC<{ text: string; color: string }> = ({ text, color }) => {
   );
 };
 
+// ---------- «вау»-графика ----------
+
+const ZONE_COL = [KISHI, ORTA, ULY];
+
+// Частицы: летят из хаоса в форму (карта → шаңырақ). Координаты точек — в системе карты.
+const Particles: React.FC<{
+  from: "scatter" | "map";
+  to: "map" | "shanyrak";
+  start: number; // кадр начала перелёта
+  dur: number; // длительность перелёта
+  x: number;
+  y: number;
+  scale: number;
+  tint: [number, number, number]; // 0..1 окраска по зонам (Кіші, Орта, Ұлы)
+  gold?: number; // 0..1 — всё в золото
+  fade?: number; // общая прозрачность
+  spin?: number; // поворот вокруг центра шаңырақа (град)
+}> = ({ from, to, start, dur, x, y, scale, tint, gold = 0, fade = 1, spin = 0 }) => {
+  const frame = useCurrentFrame();
+  const rad = (spin * Math.PI) / 180;
+  return (
+    <svg width={1080} height={1920} style={{ position: "absolute", left: 0, top: 0 }}>
+      {MAP_PTS.map(([mx, my, z], i) => {
+        const delay = Math.floor(random(`d${i}`) * dur * 0.45);
+        const t = interpolate(frame, [start + delay, start + delay + dur * 0.55], [0, 1], {
+          ...clamp,
+          easing: Easing.inOut(Easing.cubic),
+        });
+        const sx =
+          from === "scatter" ? random(`x${i}`) * 1400 - 160 : x + mx * scale;
+        const sy =
+          from === "scatter" ? random(`y${i}`) * 2200 - 140 : y + my * scale;
+        let tx: number;
+        let ty: number;
+        if (to === "map") {
+          tx = x + mx * scale;
+          ty = y + my * scale;
+        } else {
+          const [qx, qy] = SHANYRAK_PTS[i];
+          const ox = qx - 450;
+          const oy = qy - 248;
+          tx = x + (450 + ox * Math.cos(rad) - oy * Math.sin(rad)) * scale;
+          ty = y + (248 + ox * Math.sin(rad) + oy * Math.cos(rad)) * scale;
+        }
+        // дуга полёта
+        const arc = Math.sin(t * Math.PI) * (random(`a${i}`) - 0.5) * 220;
+        const px = sx + (tx - sx) * t + arc;
+        const py = sy + (ty - sy) * t - Math.abs(arc) * 0.4;
+        const tw = 0.7 + 0.3 * Math.sin(frame / 5 + i);
+        const zc = tint[z] > 0.5 ? ZONE_COL[z] : "#ffffff";
+        const col = gold > 0.5 ? GOLD : zc;
+        return (
+          <circle
+            key={i}
+            cx={px}
+            cy={py}
+            r={(i < 260 ? 4.2 : 3.2) * (0.8 + t * 0.4)}
+            fill={col}
+            opacity={fade * tw * (0.35 + t * 0.65)}
+          />
+        );
+      })}
+    </svg>
+  );
+};
+
+// Объёмная карта: наклон, активная зона «поднимается» из земли
+const Map3D: React.FC<{ zone: 0 | 1 | 2 }> = ({ zone }) => {
+  const frame = useCurrentFrame();
+  const rise = interpolate(frame, [6, 26], [0, 1], { ...clamp, easing: Easing.out(Easing.back(1.4)) });
+  const tilt = interpolate(frame, [0, 20], [0, 34], { ...clamp, easing: ease });
+  const sway = Math.sin(frame / 45) * 4;
+  const color = ZONE_COL[zone];
+  const dim: [number, number, number] = [1, 1, 1];
+  dim[zone] = 0;
+  const id = `z${zone}`;
+  const layer = (dy: number, fill: string, key: string, op = 1) => (
+    <svg
+      key={key}
+      width={MAP_W}
+      height={MAP_H}
+      viewBox={`0 0 ${MAP_W} ${MAP_H}`}
+      style={{ position: "absolute", left: 0, top: dy, overflow: "visible", opacity: op }}
+    >
+      <defs>
+        <clipPath id={`${id}c`}>
+          <path d={KZ_PATH} />
+        </clipPath>
+        <mask id={`${id}m`}>
+          {zone === 1 ? (
+            <>
+              <rect width={MAP_W} height={MAP_H} fill="#fff" />
+              <polygon points={ZONE_KISHI} fill="#000" />
+              <polygon points={ZONE_ULY} fill="#000" />
+            </>
+          ) : (
+            <polygon points={zone === 0 ? ZONE_KISHI : ZONE_ULY} fill="#fff" />
+          )}
+        </mask>
+      </defs>
+      <g clipPath={`url(#${id}c)`}>
+        <rect width={MAP_W} height={MAP_H} fill={fill} mask={`url(#${id}m)`} />
+      </g>
+    </svg>
+  );
+  const H = 34; // высота «подъёма»
+  return (
+    <div style={{ position: "absolute", left: 90, top: 210, width: MAP_W, height: MAP_H, perspective: 1300 }}>
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          transformStyle: "preserve-3d",
+          transform: `rotateX(${tilt}deg) rotateZ(${sway}deg)`,
+          transformOrigin: "50% 60%",
+        }}
+      >
+        <KzMap draw={1} fill={[1, 1, 1]} dim={dim} x={0} y={0} scale={1} labels={0} />
+        {/* тень и «толщина» поднятой зоны */}
+        {Array.from({ length: 8 }, (_, k) => layer(-(k / 8) * H * rise, "#0a0f1c", `s${k}`, 0.55))}
+        {layer(-H * rise, color, "top")}
+        <svg
+          width={MAP_W}
+          height={MAP_H}
+          viewBox={`0 0 ${MAP_W} ${MAP_H}`}
+          style={{ position: "absolute", left: 0, top: -H * rise, overflow: "visible" }}
+        >
+          <text
+            x={[150, 470, 640][zone]}
+            y={[260, 190, 400][zone]}
+            textAnchor="middle"
+            fontFamily="Montserrat"
+            fontWeight={900}
+            fontSize={42}
+            fill="#fff"
+            stroke={INK}
+            strokeWidth={8}
+            paintOrder="stroke"
+            opacity={rise}
+          >
+            {["КІШІ ЖҮЗ", "ОРТА ЖҮЗ", "ҰЛЫ ЖҮЗ"][zone]}
+          </text>
+        </svg>
+      </div>
+    </div>
+  );
+};
+
+// Ударная волна и лучи для ұрана
+const Shock: React.FC<{ at: number; color: string }> = ({ at, color }) => {
+  const frame = useCurrentFrame();
+  const t = frame - at;
+  if (t < 0 || t > 40) return null;
+  const ring = (k: number) => {
+    const p = interpolate(t - k * 5, [0, 22], [0, 1], { ...clamp, easing: Easing.out(Easing.cubic) });
+    return (
+      <circle key={k} cx={0} cy={0} r={60 + p * 520} fill="none" stroke={k ? "#fff" : color} strokeWidth={14 * (1 - p)} opacity={1 - p} />
+    );
+  };
+  const raysO = interpolate(t, [0, 4, 30], [0, 0.55, 0], clamp);
+  return (
+    <svg width={1200} height={1200} viewBox="-600 -600 1200 1200" style={{ position: "absolute", left: "50%", top: "50%", marginLeft: -600, marginTop: -600, pointerEvents: "none", overflow: "visible" }}>
+      <g transform={`rotate(${t * 1.5})`} opacity={raysO}>
+        {Array.from({ length: 16 }, (_, i) => (
+          <path key={i} d="M0,0 L-30,-560 L30,-560 Z" fill="#fff" transform={`rotate(${i * 22.5})`} opacity={0.35} />
+        ))}
+      </g>
+      {[0, 1].map(ring)}
+      {Array.from({ length: 18 }, (_, i) => {
+        const a = (i / 18) * Math.PI * 2 + random(`s${at}${i}`);
+        const d = interpolate(t, [0, 26], [80, 300 + random(`q${at}${i}`) * 200], { ...clamp, easing: Easing.out(Easing.quad) });
+        return <circle key={i} cx={Math.cos(a) * d} cy={Math.sin(a) * d} r={6} fill={GOLD} opacity={interpolate(t, [0, 26], [1, 0], clamp)} />;
+      })}
+    </svg>
+  );
+};
+
 // ---------- сцены ----------
 
 const S1Hook: React.FC = () => (
@@ -496,21 +675,27 @@ const S2Ata: React.FC = () => {
 
 const S3Map: React.FC = () => {
   const frame = useCurrentFrame();
-  const draw = interpolate(frame, [0, f(1.4)], [0, 1], { ...clamp, easing: Easing.inOut(Easing.cubic) });
   // зоны вспыхивают на словах «Ұлы жүз, Орта жүз, Кіші жүз»
   const z = (t: number) => interpolate(frame, [f(t), f(t) + 8], [0, 1], clamp);
+  const solid = interpolate(frame, [f(1.5), f(2.2)], [0, 1], clamp);
   return (
     <>
       <Title y={330} size={84}>
         <span style={{ color: GOLD }}>ҮШ</span> ЖҮЗ
       </Title>
-      <KzMap
-        draw={draw}
-        fill={[z(4.3), z(3.4), z(2.4)]}
+      <div style={{ opacity: solid }}>
+        <KzMap draw={1} fill={[z(4.3), z(3.4), z(2.4)]} x={0} y={760} scale={1.2} labels={1} />
+      </div>
+      <Particles
+        from="scatter"
+        to="map"
+        start={0}
+        dur={f(1.8)}
         x={0}
         y={760}
         scale={1.2}
-        labels={1}
+        tint={[z(4.3), z(3.4), z(2.4)]}
+        fade={1 - solid * 0.7}
       />
     </>
   );
@@ -527,12 +712,10 @@ const ZoneScene: React.FC<{
   badge: string;
 }> = ({ zone, title, where, clans, chipsFrom, chipsStep, chipsAt, badge }) => {
   const color = [KISHI, ORTA, ULY][zone];
-  const dim: [number, number, number] = [1, 1, 1];
-  dim[zone] = 0;
   return (
     <>
       <Badge text={badge} color={color} />
-      <KzMap draw={1} fill={[1, 1, 1]} dim={dim} x={90} y={170} scale={1} labels={1} glow={color} />
+      <Map3D zone={zone} />
       <Title y={760} size={96} color={color}>
         {title}
       </Title>
@@ -564,8 +747,12 @@ const S9Uran: React.FC<{ at: number[] }> = ({ at }) => {
         const s = spring({ frame: frame - d, fps, config: { damping: 9, stiffness: 220 } });
         const shake = frame >= d && frame < d + 8 ? Math.sin(frame * 3) * (8 - (frame - d)) : 0;
         return (
+          <div key={z}>
+          {/* волна позади карточки */}
+          <div style={{ position: "absolute", top: 520 + i * 380, left: 80, right: 80, height: 320 }}>
+            <Shock at={d} color={c} />
+          </div>
           <div
-            key={z}
             style={{
               position: "absolute",
               top: 520 + i * 380,
@@ -573,7 +760,7 @@ const S9Uran: React.FC<{ at: number[] }> = ({ at }) => {
               right: 80,
               height: 320,
               borderRadius: 36,
-              background: `linear-gradient(135deg, ${c} 0%, ${c}cc 100%)`,
+              background: c,
               opacity: card,
               transform: `translateX(${(1 - card) * (i % 2 ? 300 : -300)}px) translateX(${shake}px)`,
               boxShadow: "0 18px 50px rgba(0,0,0,0.4)",
@@ -599,6 +786,7 @@ const S9Uran: React.FC<{ at: number[] }> = ({ at }) => {
             >
               {w}
             </div>
+          </div>
           </div>
         );
       })}
@@ -704,26 +892,35 @@ const S7Out: React.FC = () => (
 
 const S8Outro: React.FC = () => {
   const frame = useCurrentFrame();
-  const merge = interpolate(frame, [f(0.2), f(1.4)], [0, 1], { ...clamp, easing: ease });
-  const draw = interpolate(frame, [f(1.0), f(2.4)], [0, 1], { ...clamp, easing: Easing.inOut(Easing.cubic) });
-  const spin = frame * 0.25;
-  const dots: [string, number][] = [
-    [ULY, -90],
-    [ORTA, 30],
-    [KISHI, 150],
-  ];
+  const gold = interpolate(frame, [f(1.0), f(1.6)], [0, 1], clamp);
+  const lock = interpolate(frame, [f(2.0), f(2.6)], [0, 1], clamp);
+  const spin = frame * 0.35;
+  const glow = 0.5 + 0.5 * Math.sin(frame / 8);
   return (
     <>
-      <svg width={1080} height={900} style={{ position: "absolute", top: 180 }}>
-        {dots.map(([c, ang]) => {
-          const r = 260 * (1 - merge);
-          const x = 540 + Math.cos((ang * Math.PI) / 180) * r;
-          const y = 420 + Math.sin((ang * Math.PI) / 180) * r;
-          return <circle key={c} cx={x} cy={y} r={120} fill={c} opacity={0.85 * (1 - draw * 0.8)} style={{ mixBlendMode: "screen" }} />;
-        })}
-      </svg>
-      <div style={{ position: "absolute", top: 380, left: 340, opacity: draw }}>
-        <Shanyrak size={400} draw={draw} spin={spin} />
+      {/* карта из частиц складывается в шаңырақ */}
+      <Particles
+        from="map"
+        to="shanyrak"
+        start={f(0.5)}
+        dur={f(1.8)}
+        x={90}
+        y={330}
+        scale={1}
+        tint={[1, 1, 1]}
+        gold={gold}
+        spin={spin}
+      />
+      <div
+        style={{
+          position: "absolute",
+          top: 330 + 248 - 220,
+          left: 90 + 450 - 220,
+          opacity: lock,
+          filter: `drop-shadow(0 0 ${12 + glow * 18}px ${GOLD})`,
+        }}
+      >
+        <Shanyrak size={440} draw={lock} spin={spin} />
       </div>
       <Title y={940} size={88}>
         Рулар көп —
