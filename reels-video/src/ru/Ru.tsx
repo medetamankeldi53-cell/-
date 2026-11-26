@@ -39,12 +39,12 @@ export const SCENES: Scene[] = [
   { id: "06", dur: 4.8, has: true }, // Кіші жүз
   { id: "07", dur: 3.74, has: true }, // төре, қожа
   { id: "09", dur: 9.04, has: true }, // ұрандар
-  { id: "10", dur: 9.0, has: false }, // мәтел
+  { id: "10", dur: 10.63, has: true }, // мәтел
   { id: "08", dur: 6.14, has: true }, // финал
 ];
 // моменты внутри сцен (с) — по озвучке 09 и 10
 const URAN_AT = [3.25, 5.69, 8.04]; // начало «Бақтияр!», «Ақжол!», «Алатау!» в 09.mp3
-const MATEL_AT = [1.8, 4.2, 6.6];
+const MATEL_AT = [2.0, 4.85, 7.8]; // начало строк мәтела в 10.mp3
 // последняя сцена держится на 1,5 с дольше, без пустого хвоста
 const lens = SCENES.map((s, i) => f(s.dur + PAD + (i === SCENES.length - 1 ? 1.5 : 0)));
 const starts = lens.map((_, i) => lens.slice(0, i).reduce((a, b) => a + b, 0));
