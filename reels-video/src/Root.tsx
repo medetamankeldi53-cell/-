@@ -10,6 +10,7 @@ import { Qambar, QAMBAR_DURATION } from "./qambar/Qambar";
 import { Tizim, TIZIM_DURATION, TIZIM_FPS } from "./tizim/Tizim";
 import { Iz, IZ_DURATION, IZ_FPS } from "./iz/Iz";
 import { Drive, DRIVE_DURATION, DRIVE_FPS } from "./drive/Drive";
+import { Ru, RU_DURATION, RU_FPS } from "./ru/Ru";
 import { calculateLessonMetadata, LessonVideo } from "./lesson/Lesson";
 import prompt101 from "./lesson/lessons/prompt-101.json";
 import videoPrompt from "./lesson/lessons/video-prompt.json";
@@ -261,6 +262,15 @@ export const RemotionRoot: React.FC = () => {
         height={720}
         fps={DRIVE_FPS}
         durationInFrames={DRIVE_DURATION}
+      />
+      {/* «Қазақтың рулары» — 2D-анимация, 9:16 */}
+      <Composition
+        id="Ru"
+        component={Ru}
+        width={1080}
+        height={1920}
+        fps={RU_FPS}
+        durationInFrames={RU_DURATION}
       />
     </>
   );
