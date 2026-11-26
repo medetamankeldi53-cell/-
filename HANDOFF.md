@@ -39,6 +39,9 @@ Chromium Remotion сам не скачивает (remotion.media закрыт) �
 | `Lift` | вирусный перемонтаж «Лифт» (без наездов) | `src/lift/` | `exports/Lift-viral.mp4` |
 | `Qambar` | промо «Қамбар Ата» дүкені: motion-графика, диктор, эмблема, телефоны | `src/qambar/` | `exports/Qambar-Ata.mp4` |
 | `Tizim` | «Уақыт куәлары: 1916. Тізім» 16:9 — надписи, переозвучка ElevenLabs под звук видео (`scripts/tizim-match.py`), голос жиена (B4) оригинальный | `src/tizim/` | `exports/1916-Tizim.mp4` |
+| `Iz` | «Із» — хук «Мен шыңға емес…», субтитры | `src/iz/` | `exports/IZ-hook.mp4` |
+| `Drive` | «Анашым» — хук с фарами, музыка/SFX ElevenLabs, финал про ана дұғасы | `src/drive/` | `exports/Anashym-1080p.mp4` |
+| `Ru` / `RuCover` | «Қазақтың рулары», 79 с: частицы→карта, 3D-карта, портал жүза, титр за горами (маски `public/ru/matte_*.png`), ожившие фоны (`loop_*.mp4`), ұрандар, мәтел, созвездие АЛАШ; обложка | `src/ru/` | `exports/Qazaq-rulary.mp4`, `-cover.jpg` |
 | `Lesson-prompt-101` | видео-урок «Жақсы промпт: 4 ереже», 74 с | `src/lesson/` | `exports/Sabaq-jaqsy-prompt.mp4` |
 
 Общие куски: `src/fonts.ts` (Montserrat + Cormorant Garamond с казахскими буквами, локально в `public/fonts/`),
