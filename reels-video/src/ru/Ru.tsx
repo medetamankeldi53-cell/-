@@ -669,62 +669,6 @@ const Shock: React.FC<{ at: number; color: string }> = ({ at, color }) => {
   );
 };
 
-// Заголовок по буквам: каждая буква поднимается с поворотом, затем по слову проходит блик
-const LetterTitle: React.FC<{ text: string; y: number; size: number; color: string }> = ({ text, y, size, color }) => {
-  const frame = useCurrentFrame();
-  const sweep = interpolate(frame, [18, 40], [-30, 130], clamp);
-  const letters = Array.from(text);
-  const word = (
-    <>
-      {letters.map((ch, i) => {
-        const p = interpolate(frame, [i * 2, i * 2 + 12], [0, 1], { ...clamp, easing: Easing.out(Easing.back(1.6)) });
-        return (
-          <span
-            key={i}
-            style={{
-              display: "inline-block",
-              whiteSpace: "pre",
-              opacity: p,
-              transform: `translateY(${(1 - p) * 60}px) rotateX(${(1 - p) * 80}deg)`,
-            }}
-          >
-            {ch}
-          </span>
-        );
-      })}
-    </>
-  );
-  const style: React.CSSProperties = {
-    position: "absolute",
-    top: y,
-    left: 0,
-    right: 0,
-    textAlign: "center",
-    fontFamily: "Montserrat",
-    fontWeight: 900,
-    fontSize: size,
-    lineHeight: 1.1,
-    perspective: 600,
-  };
-  return (
-    <>
-      <div style={{ ...style, color, textShadow: `0 6px 24px rgba(0,0,0,0.5), 0 0 30px ${color}55` }}>{word}</div>
-      {/* блик */}
-      <div
-        style={{
-          ...style,
-          color: "transparent",
-          backgroundImage: `linear-gradient(105deg, transparent ${sweep - 12}%, rgba(255,255,255,0.95) ${sweep}%, transparent ${sweep + 12}%)`,
-          WebkitBackgroundClip: "text",
-          backgroundClip: "text",
-        }}
-      >
-        {text}
-      </div>
-    </>
-  );
-};
-
 // ---------- сцены ----------
 
 const S1Hook: React.FC = () => (
@@ -806,6 +750,113 @@ const S3Map: React.FC = () => {
   );
 };
 
+// Раскладка сцен жүзов: где проходит хребет/горизонт на иллюстрации
+const ZONE_LAYOUT: Record<number, { bg: string; titleY: number; chipsTop: number; hole: [number, number] }> = {
+  0: { bg: "kishi", titleY: 985, chipsTop: 1270, hole: [540, 960] },
+  1: { bg: "orta", titleY: 1040, chipsTop: 1300, hole: [540, 960] },
+  2: { bg: "uly", titleY: 830, chipsTop: 1150, hole: [540, 960] },
+};
+const SHADE =
+  "linear-gradient(180deg, rgba(8,14,30,0.55) 0%, rgba(8,14,30,0.25) 45%, rgba(8,14,30,0.15) 65%, rgba(8,14,30,0.55) 100%)";
+
+// Передний план иллюстрации (тот же цикл, вырезан маской хребта) — то, что закрывает надпись
+const Foreground: React.FC<{ bg: string }> = ({ bg }) => (
+  <AbsoluteFill
+    style={{
+      WebkitMaskImage: `url(${staticFile(`ru/matte_${bg}.png`)})`,
+      maskImage: `url(${staticFile(`ru/matte_${bg}.png`)})`,
+      WebkitMaskSize: "100% 100%",
+      maskSize: "100% 100%",
+    }}
+  >
+    <Video src={staticFile(`ru/loop_${bg}.mp4`)} loop muted objectFit="cover" style={{ width: "100%", height: "100%" }} />
+    <AbsoluteFill style={{ background: SHADE }} />
+  </AbsoluteFill>
+);
+
+// Огромная надпись, которая поднимается ИЗ-ЗА гор / горизонта
+const BehindTitle: React.FC<{ text: string; y: number; color: string }> = ({ text, y, color }) => {
+  const frame = useCurrentFrame();
+  const p = interpolate(frame, [24, 52], [0, 1], { ...clamp, easing: Easing.out(Easing.cubic) });
+  const glow = 0.6 + 0.4 * Math.sin(frame / 10);
+  return (
+    <div
+      style={{
+        position: "absolute",
+        top: y + (1 - p) * 260,
+        left: 0,
+        right: 0,
+        textAlign: "center",
+        fontFamily: "Montserrat",
+        fontWeight: 900,
+        fontSize: 172,
+        letterSpacing: 4,
+        lineHeight: 1,
+        color,
+        textShadow: `0 0 ${40 * glow}px ${color}aa, 0 10px 40px rgba(0,0,0,0.5)`,
+      }}
+    >
+      {text}
+    </div>
+  );
+};
+
+// Портал: тёмный экран, в нём «дыра» формы жүза растёт из карты на весь кадр
+const Portal: React.FC<{ zone: 0 | 1 | 2; cx: number; cy: number }> = ({ zone, cx, cy }) => {
+  const frame = useCurrentFrame();
+  // 0–10: окно формы жүза в центре; 10–30: окно раскрывается на весь кадр
+  const k = interpolate(frame, [0, 10, 30], [0.6, 1.4, 18], { ...clamp, easing: Easing.inOut(Easing.cubic) });
+  const edge = interpolate(frame, [0, 4, 24, 30], [0, 1, 1, 0], clamp);
+  if (frame > 31) return null;
+  // центр зоны в координатах карты
+  const [zx, zy] = [[170, 270], [470, 200], [640, 400]][zone];
+  const tr = `translate(${cx} ${cy}) scale(${k}) translate(${-zx} ${-zy})`;
+  const shape =
+    zone === 1 ? (
+      <g transform={tr}>
+        <path d={KZ_PATH} fill="#000" />
+        <polygon points={ZONE_KISHI} fill="#fff" />
+        <polygon points={ZONE_ULY} fill="#fff" />
+      </g>
+    ) : (
+      <g transform={tr}>
+        <clipPath id={`pc${zone}`}>
+          <path d={KZ_PATH} />
+        </clipPath>
+        <polygon points={zone === 0 ? ZONE_KISHI : ZONE_ULY} fill="#000" clipPath={`url(#pc${zone})`} />
+      </g>
+    );
+  return (
+    <svg width={1080} height={1920} style={{ position: "absolute", left: 0, top: 0 }}>
+      <defs>
+        <mask id={`pm${zone}`}>
+          <rect width={1080} height={1920} fill="#fff" />
+          {shape}
+        </mask>
+      </defs>
+      <rect width={1080} height={1920} fill="#0b1326" mask={`url(#pm${zone})`} />
+      {/* золотая кромка портала */}
+      <g transform={tr} opacity={edge}>
+        <path
+          d={zone === 1 ? KZ_PATH : ""}
+          fill="none"
+          stroke={GOLD}
+          strokeWidth={4 / k}
+        />
+        {zone !== 1 && (
+          <polygon
+            points={zone === 0 ? ZONE_KISHI : ZONE_ULY}
+            fill="none"
+            stroke={GOLD}
+            strokeWidth={4 / k}
+            clipPath={`url(#pc${zone})`}
+          />
+        )}
+      </g>
+    </svg>
+  );
+};
+
 const ZoneScene: React.FC<{
   zone: 0 | 1 | 2;
   title: string;
@@ -817,15 +868,20 @@ const ZoneScene: React.FC<{
   badge: string;
 }> = ({ zone, title, where, clans, chipsFrom, chipsStep, chipsAt, badge }) => {
   const color = [KISHI, ORTA, ULY][zone];
+  const L = ZONE_LAYOUT[zone];
   return (
     <>
-      <Badge text={badge} color={color} />
-      <Map3D zone={zone} />
-      <LetterTitle text={title} y={760} size={96} color={color} />
-      <Title y={880} size={44} delay={5} color="rgba(255,255,255,0.85)">
+      <BehindTitle text={title} y={L.titleY} color={color} />
+      <Foreground bg={L.bg} />
+      <Sequence from={22}>
+        <Badge text={badge} color={color} />
+        <Map3D zone={zone} />
+      </Sequence>
+      <Portal zone={zone} cx={L.hole[0]} cy={L.hole[1]} />
+      <Title y={L.titleY - 80} size={44} delay={20} color="rgba(255,255,255,0.9)">
         {where}
       </Title>
-      <Chips items={clans} color={color} from={chipsFrom} step={chipsStep} top={1020} at={chipsAt} />
+      <Chips items={clans} color={color} from={chipsFrom} step={chipsStep} top={L.chipsTop} at={chipsAt} />
     </>
   );
 };
