@@ -14,6 +14,7 @@ import {
 import "../fonts";
 import { CITIES, KZ_PATH, MAP_H, MAP_W, ZONE_KISHI, ZONE_ULY } from "./map";
 import { MAP_PTS, SHANYRAK_PTS } from "./points";
+import { SERIF } from "../witness/parts";
 
 // «Қазақтың рулары» — 2D-анимация 1080×1920, диктор Alex Bell (ElevenLabs).
 // Озвучка по сценам: public/ru/NN.mp3. Если файла сцены ещё нет — сцена идёт без звука
@@ -129,10 +130,10 @@ const Title: React.FC<{
         left: 60,
         right: 60,
         textAlign: "center",
-        fontFamily: "Montserrat",
-        fontWeight: 900,
-        fontSize: size,
-        lineHeight: 1.12,
+        fontFamily: SERIF, // классическая антиква — «тарихи фильм»
+        fontWeight: 700,
+        fontSize: size * 1.18,
+        lineHeight: 1.02,
         color,
         opacity: p,
         transform: `translateY(${(1 - p) * 40}px)`,
@@ -696,9 +697,9 @@ const S0Shout: React.FC = () => {
             left: 0,
             right: 0,
             textAlign: "center",
-            fontFamily: "Montserrat",
-            fontWeight: 900,
-            fontSize: 168,
+            fontFamily: SERIF,
+            fontWeight: 700,
+            fontSize: 190,
             color: "#fff",
             transform: `scale(${Math.max(0.95, 1 + (1 - s) * 0.2)})`, // с 1-го кадра слово читается целиком
             textShadow: `0 8px 0 ${INK}, 0 0 60px ${ULY}`,
@@ -838,10 +839,10 @@ const BehindTitle: React.FC<{ text: string; y: number; color: string }> = ({ tex
         left: 0,
         right: 0,
         textAlign: "center",
-        fontFamily: "Montserrat",
-        fontWeight: 900,
-        fontSize: 172,
-        letterSpacing: 4,
+        fontFamily: SERIF,
+        fontWeight: 700,
+        fontSize: 200,
+        letterSpacing: 6,
         lineHeight: 1,
         color,
         textShadow: `0 0 ${40 * glow}px ${color}aa, 0 10px 40px rgba(0,0,0,0.5)`,
@@ -988,9 +989,9 @@ const S9Uran: React.FC<{ at: number[] }> = ({ at }) => {
             </div>
             <div
               style={{
-                fontFamily: "Montserrat",
-                fontWeight: 900,
-                fontSize: 120,
+                fontFamily: SERIF,
+                fontWeight: 700,
+                fontSize: 138,
                 color: "#fff",
                 transform: `scale(${interpolate(s, [0, 1], [2.2, 1])})`,
                 opacity: Math.min(1, s * 2),
