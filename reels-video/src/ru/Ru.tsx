@@ -263,6 +263,9 @@ const Chip: React.FC<{ text: string; color: string; delay: number; big?: boolean
       }}
     >
       {text}
+      <Sequence from={delay} durationInFrames={30}>
+        <Audio src={staticFile("ru/sfx_pluck.wav")} volume={0.32} />
+      </Sequence>
     </div>
   );
 };
@@ -684,6 +687,7 @@ const S3Map: React.FC = () => {
       <Title y={330} size={84}>
         <span style={{ color: GOLD }}>ҮШ</span> ЖҮЗ
       </Title>
+      <Audio src={staticFile("ru/sfx_shimmer.wav")} volume={0.5} />
       <div style={{ opacity: solid }}>
         <KzMap draw={1} fill={[z(4.3), z(3.4), z(2.4)]} x={0} y={760} scale={1.2} labels={1} />
       </div>
@@ -749,6 +753,9 @@ const S9Uran: React.FC<{ at: number[] }> = ({ at }) => {
         const shake = frame >= d && frame < d + 8 ? Math.sin(frame * 3) * (8 - (frame - d)) : 0;
         return (
           <div key={z}>
+          <Sequence from={d - 2} durationInFrames={60}>
+            <Audio src={staticFile("ru/sfx_impact.wav")} volume={0.55} />
+          </Sequence>
           {/* волна позади карточки */}
           <div style={{ position: "absolute", top: 520 + i * 380, left: 80, right: 80, height: 320 }}>
             <Shock at={d} color={c} />
@@ -899,6 +906,9 @@ const S8Outro: React.FC = () => {
   const glow = 0.5 + 0.5 * Math.sin(frame / 8);
   return (
     <>
+      <Sequence from={f(0.4)} durationInFrames={f(2.5)}>
+        <Audio src={staticFile("ru/sfx_shimmer.wav")} volume={0.5} />
+      </Sequence>
       {/* карта из частиц складывается в шаңырақ */}
       <Particles
         from="map"
@@ -962,12 +972,54 @@ const Backdrop: React.FC<{ img: string }> = ({ img }) => {
           transform: `translateY(${pan}px)`,
         }}
       />
+      {SUN[img] && <SunFlare x={SUN[img][0]} y={SUN[img][1] + pan} />}
       <AbsoluteFill
         style={{
           background:
             "linear-gradient(180deg, rgba(8,14,30,0.55) 0%, rgba(8,14,30,0.25) 45%, rgba(8,14,30,0.15) 65%, rgba(8,14,30,0.55) 100%)",
         }}
       />
+    </AbsoluteFill>
+  );
+};
+
+// Солнце на иллюстрации: тёплое свечение и горизонтальный блик (координаты в кадре до панорамы)
+const SUN: Record<string, [number, number]> = { orta: [490, 1323], kishi: [102, 1270] };
+const SunFlare: React.FC<{ x: number; y: number }> = ({ x, y }) => {
+  const frame = useCurrentFrame();
+  const pulse = 0.75 + 0.25 * Math.sin(frame / 14);
+  return (
+    <div style={{ position: "absolute", left: x - 400, top: y - 400, width: 800, height: 800, pointerEvents: "none", mixBlendMode: "screen" }}>
+      <div style={{ position: "absolute", inset: 0, borderRadius: "50%", background: `radial-gradient(circle, rgba(255,190,90,${0.55 * pulse}) 0%, rgba(255,140,60,${0.18 * pulse}) 25%, rgba(0,0,0,0) 60%)` }} />
+      <div style={{ position: "absolute", left: -300, right: -300, top: 396, height: 8, background: `linear-gradient(90deg, rgba(0,0,0,0), rgba(255,210,140,${0.5 * pulse}), rgba(0,0,0,0))`, filter: "blur(2px)" }} />
+    </div>
+  );
+};
+
+// Плёнка: зерно + виньетка (поверх всего)
+const FilmLook: React.FC = () => {
+  const frame = useCurrentFrame();
+  return (
+    <AbsoluteFill style={{ pointerEvents: "none" }}>
+      <svg width={1080} height={1920} style={{ position: "absolute", opacity: 0.07, mixBlendMode: "overlay" }}>
+        <filter id="grain">
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves={2} seed={frame % 12} />
+        </filter>
+        <rect width={1080} height={1920} filter="url(#grain)" />
+      </svg>
+      <AbsoluteFill style={{ background: "radial-gradient(ellipse at 50% 45%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.45) 100%)" }} />
+    </AbsoluteFill>
+  );
+};
+
+// Тёплая вспышка света на смене сцен
+const LightLeak: React.FC<{ seed: number }> = ({ seed }) => {
+  const frame = useCurrentFrame();
+  const o = interpolate(frame, [0, 8, 26], [0, 0.45, 0], clamp);
+  const x = seed % 2 ? 1080 : 0;
+  return (
+    <AbsoluteFill style={{ pointerEvents: "none", mixBlendMode: "screen", opacity: o }}>
+      <div style={{ position: "absolute", left: x - 700, top: 200 + (seed * 377) % 1200, width: 1400, height: 1400, borderRadius: "50%", background: "radial-gradient(circle, rgba(255,170,80,0.9) 0%, rgba(255,90,40,0.35) 35%, rgba(0,0,0,0) 70%)" }} />
     </AbsoluteFill>
   );
 };
@@ -1043,6 +1095,12 @@ export const Ru: React.FC = () => {
           {i > 0 && <Audio src={staticFile("sfx/whoosh.wav")} volume={0.08} />}
         </Sequence>
       ))}
+      {starts.slice(1).map((st, i) => (
+        <Sequence key={`leak${st}`} from={st - 6} durationInFrames={28}>
+          <LightLeak seed={i} />
+        </Sequence>
+      ))}
+      <FilmLook />
       <Audio
         src={staticFile("ru/music.mp3")}
         volume={(fr) =>
