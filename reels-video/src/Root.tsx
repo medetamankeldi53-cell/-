@@ -11,6 +11,7 @@ import { Tizim, TIZIM_DURATION, TIZIM_FPS } from "./tizim/Tizim";
 import { Iz, IZ_DURATION, IZ_FPS } from "./iz/Iz";
 import { Drive, DRIVE_DURATION, DRIVE_FPS } from "./drive/Drive";
 import { Ru, RU_DURATION, RU_FPS, RuCover } from "./ru/Ru";
+import { Batyr, BATYR_DURATION, BATYR_FPS } from "./batyr/Batyr";
 import { calculateLessonMetadata, LessonVideo } from "./lesson/Lesson";
 import prompt101 from "./lesson/lessons/prompt-101.json";
 import videoPrompt from "./lesson/lessons/video-prompt.json";
@@ -273,6 +274,15 @@ export const RemotionRoot: React.FC = () => {
         durationInFrames={RU_DURATION}
       />
       <Still id="RuCover" component={RuCover} width={1080} height={1920} />
+      {/* «Кішкентай батыр» — смешной монтаж домашнего видео */}
+      <Composition
+        id="Batyr"
+        component={Batyr}
+        width={1080}
+        height={1920}
+        fps={BATYR_FPS}
+        durationInFrames={BATYR_DURATION}
+      />
     </>
   );
 };
