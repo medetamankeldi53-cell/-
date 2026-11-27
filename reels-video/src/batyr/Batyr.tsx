@@ -12,7 +12,7 @@ import {
 import "../fonts";
 
 // «Кішкентай батыр» — смешной монтаж домашнего видео (1080×1920, 30 fps).
-// Исходник public/batyr/src.mp4 (18 с); смешная часть с 9,5 с. Без наездов — только
+// Исходник public/batyr/src.mp4 (18 с) целиком; самое смешное — с 13 с. Без наездов — только
 // скорость, стоп-кадры, надписи и звук.
 
 export const BATYR_FPS = 30;
@@ -23,20 +23,18 @@ const GOLD = "#f2c46d";
 // Отрезки: [начало в исходнике, конец, скорость]
 type Seg = { from: number; to: number; rate: number; mute?: boolean };
 const SEGS: Seg[] = [
-  { from: 9.5, to: 11.6, rate: 1 }, // идёт с «оружием»
+  { from: 0, to: 8, rate: 1 }, // начало: дети играют
+  { from: 8, to: 11.6, rate: 1 }, // малыш с «оружием»
   { from: 11.6, to: 12.6, rate: 0.5, mute: true }, // взмах — замедление
-  { from: 12.6, to: 16.85, rate: 1 }, // брат тянет палку, не отдаёт
-  { from: 16.85, to: 18.1, rate: 1 }, // смеётся, поднял палку
-];
+  { from: 12.6, to: 18.1, rate: 1 }, // самое смешное (с 13 с): брат тянет палку, не отдаёт, смеётся
+]
 const HOOK = 1.4;
-const SHOUT = 0; // стоп-кадр убран по просьбе
 const segLen = (s: Seg) => (s.to - s.from) / s.rate;
 // начало каждого отрезка в ролике
 const starts: number[] = [];
 {
   let t = HOOK;
-  SEGS.forEach((s, i) => {
-    if (i === 3) t += SHOUT;
+  SEGS.forEach((s) => {
     starts.push(t);
     t += segLen(s);
   });
@@ -132,10 +130,19 @@ export const Batyr: React.FC = () => {
       ))}
 
       {/* Подписи по сюжету */}
-      <Sequence from={f(at(9.8))} durationInFrames={f(1.9)}>
+      <Sequence from={f(at(1.0))} durationInFrames={f(2.2)}>
+        <Cap size={66}>Батырлар шайқасы ⚔️</Cap>
+      </Sequence>
+      <Sequence from={f(at(6.6))} durationInFrames={f(1.3)}>
+        <Cap size={100} rot={4}>
+          Абайла! 😱
+        </Cap>
+        <Audio src={staticFile("sfx/whoosh.wav")} volume={0.6} />
+      </Sequence>
+      <Sequence from={f(at(9.6))} durationInFrames={f(1.9)}>
         <Cap>Батыр қаруын алды…</Cap>
       </Sequence>
-      <Sequence from={f(starts[1])} durationInFrames={f(segLen(SEGS[1]))}>
+      <Sequence from={f(starts[2])} durationInFrames={f(segLen(SEGS[2]))}>
         <Cap size={110} rot={-6}>
           ⚔️ <span style={{ color: "#7fd3ff" }}>ШЫҢҚ!</span>
         </Cap>
@@ -144,10 +151,16 @@ export const Batyr: React.FC = () => {
           <Audio src={staticFile("sfx/whoosh.wav")} volume={0.6} />
         </Sequence>
       </Sequence>
-      <Sequence from={f(at(13.1))} durationInFrames={f(1.8)}>
+      <Sequence from={f(at(12.65))} durationInFrames={f(1.4)}>
+        <Cap y={1380} size={70} rot={2}>
+          Ең қызығы енді басталады 👀
+        </Cap>
+        <Audio src={staticFile("sfx/pop.wav")} volume={0.4} />
+      </Sequence>
+      <Sequence from={f(at(14.1))} durationInFrames={f(1.6)}>
         <Cap>Ағасы тартып алмақшы 😳</Cap>
       </Sequence>
-      <Sequence from={f(at(15.0))} durationInFrames={f(1.6)}>
+      <Sequence from={f(at(15.7))} durationInFrames={f(1.2)}>
         <Cap size={96} rot={3}>
           БЕРМЕЙМІН! 😤
         </Cap>
